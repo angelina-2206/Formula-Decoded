@@ -1,0 +1,398 @@
+Formula Decoded
+Design Document
+
+Tagline: Breaking Down the Technology of Modern Formula One
+
+1. Design Vision
+
+Formula Decoded will be a cinematic, interactive web experience that visually explains the engineering of modern Formula One cars.
+
+The design approach combines:
+
+3D technical visualization
+scroll-based storytelling
+interactive engineering diagrams
+modern motorsport aesthetics
+
+The experience should feel similar to:
+
+a Formula One engineering lab
+an Apple-style product launch page
+an interactive motorsport exhibit
+
+Users should feel like they are exploring the anatomy of an F1 car rather than browsing a traditional website.
+
+2. Visual Inspiration
+
+The design direction is inspired by:
+
+Technical F1 illustrations
+Interactive motorsport dashboards
+High-contrast UI systems
+Engineering blueprints
+
+Key inspiration themes from the references you shared:
+
+1. Technical blueprint style
+
+Layered diagrams showing the internal structure of the car.
+
+2. Minimal motorsport UI
+
+Dark backgrounds with bright accents and glowing highlights.
+
+3. Interactive product storytelling
+
+Scrolling reveals new sections of the car.
+
+3. Design Language
+Color System
+
+Primary Colors
+
+Carbon Black #0A0A0A
+Race Red #E10600
+Electric Blue #00E5FF
+Titanium Gray #2E2E2E
+
+Accent Colors
+
+Energy Yellow #FFD000
+Telemetry Green #2FFF8A
+
+These colors mimic:
+
+carbon fiber
+
+LED telemetry lights
+
+race car highlights
+
+4. Typography
+
+Primary Font
+
+Orbitron / Exo 2
+
+Used for:
+
+headings
+UI labels
+engineering modules
+
+Secondary Font
+
+Inter
+
+Used for:
+
+body text
+
+explanations
+
+driver profiles
+
+5. Landing Page Experience
+
+The landing page must create an immediate cinematic impact.
+
+Landing Animation Concept
+Scene Start
+
+The screen begins completely black.
+
+You hear the sound of an F1 engine starting.
+
+Then:
+
+A Formula One car blasts across the screen from left to right.
+
+Sound design:
+
+engine ignition
+gear shift
+doppler fly-by
+Car Motion
+
+The car moves through the screen leaving behind:
+
+motion blur
+
+light streaks
+
+tire smoke particles
+
+After passing the screen:
+
+The camera follows the car and transitions into a 3D model of the vehicle.
+
+Title Reveal Animation
+
+After the car stops rotating slowly:
+
+The title appears with a sliding text reveal animation similar to your reference.
+
+Example animation style:
+
+FORMULA
+DECODED
+
+Text appears from masked sliding panels.
+
+Then the tagline fades in.
+
+Formula Decoded
+Breaking Down the Technology of Modern Formula One
+
+Landing Page Layout
+Hero Section
+│
+├── Racing animation intro
+├── Title reveal
+├── 3D car rotation
+└── Scroll indicator
+6. Scroll-Driven Storytelling
+
+The entire website is structured around scroll-based narrative sections.
+
+Each scroll section introduces one engineering concept.
+
+Section 1 — Explore the Car
+
+User scrolls.
+
+The car rotates slowly.
+
+Hotspots appear on the car.
+
+Example hotspots:
+
+Front Wing
+Halo
+Sidepods
+Power Unit
+Rear Wing
+Diffuser
+
+Hovering highlights components.
+
+Clicking zooms into the part.
+
+Section 2 — Aerodynamics
+
+Focus on the active aerodynamic system introduced in the new regulations.
+
+Active aero replaces DRS and allows front and rear wings to adjust between straight mode (low drag) and corner mode (high downforce).
+
+Scroll animation:
+
+wings expand
+airflow particles appear
+drag reduces
+
+Particle simulation shows airflow around the car.
+
+Section 3 — Hybrid Power Unit
+
+The next section explains the hybrid energy system.
+
+The 2026 power units will split power roughly 50-50 between the combustion engine and electric system.
+
+Visual interaction:
+
+energy flows through the car
+
+battery level animations
+
+power delivery diagrams
+
+Modes to show:
+
+Normal Mode
+Overtake Mode
+Recharge Mode
+Section 4 — Active Aero Interaction
+
+User can toggle modes.
+
+Example UI controls:
+
+Corner Mode
+Straight Mode
+Overtake Mode
+
+When switching modes:
+
+front wing angle changes
+
+rear wing opens
+
+airflow patterns update
+
+Active aerodynamics allow wings to move between low-drag and high-downforce configurations depending on track conditions.
+
+Section 5 — Exploded Engineering View
+
+Scroll transition.
+
+The car breaks apart into components.
+
+Parts float outward in an exploded diagram.
+
+Components visible:
+
+chassis
+engine
+battery
+suspension
+gearbox
+wings
+
+Hovering shows technical explanations.
+
+Section 6 — Driver Grid
+
+Next section introduces the current drivers.
+
+Animated cards.
+
+Each card contains:
+
+driver photo
+
+team
+
+nationality
+
+stats
+
+Cards expand when clicked.
+
+Section 7 — Race Calendar
+
+Interactive world map.
+
+Tracks appear as glowing nodes.
+
+Hovering reveals race details.
+
+Example tracks:
+
+Monaco
+
+Silverstone
+
+Monza
+
+Section 8 — History of Formula One
+
+A scroll timeline showing major eras.
+
+Sections include:
+
+1950s early racing
+Turbo era
+V10 era
+Hybrid era
+2026 future era
+
+Cars change visually as the timeline progresses.
+
+7. Interaction Design
+
+Key interactions:
+
+Hover effects
+
+Car parts highlight.
+
+Scroll interactions
+
+Camera movement + model rotation.
+
+Mode toggles
+
+Switch between aerodynamic modes.
+
+Component breakdown
+
+Exploded view animation.
+
+8. Animation System
+
+Primary animation libraries:
+
+GSAP
+Framer Motion
+Three.js
+React Three Fiber
+
+Animations include:
+
+parallax scroll
+
+car rotation
+
+airflow particle effects
+
+dynamic lighting
+
+component separation
+
+9. Sound Design
+
+Sound enhances immersion.
+
+Examples:
+
+Landing page
+
+engine ignition
+gear shifts
+doppler pass
+
+Interactions
+
+UI clicks
+mechanical sounds
+energy charge sounds
+10. Performance Considerations
+
+3D assets optimized.
+
+Target model size:
+
+<5MB GLB
+
+Optimizations:
+
+lazy loading
+
+GPU rendering
+
+compressed textures
+
+11. Mobile Adaptation
+
+Mobile version will use:
+
+simplified 3D interactions
+
+fewer particle simulations
+
+static fallback diagrams
+
+12. User Experience Goal
+
+Users should feel like they are:
+
+inside a Formula One engineering lab
+
+rather than browsing a static sports website.
+
+The final experience should be:
+
+immersive
+educational
+visually stunning
+highly interactive

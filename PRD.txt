@@ -1,0 +1,336 @@
+Product Requirements Document (PRD)
+Project Name:
+
+Formula Decoded
+
+Tagline:
+
+Breaking Down the Technology of Modern Formula One
+
+1. Product Overview
+
+Formula Decoded is an interactive web platform designed to visually explain the engineering, aerodynamics, and hybrid power systems of modern Formula One cars, with special emphasis on the upcoming 2026 regulations introduced by the Fédération Internationale de l'Automobile.
+
+The website will feature a high-fidelity interactive 3D Formula One car model, immersive animations, and scroll-driven storytelling to break down complex racing technologies into visually engaging experiences.
+
+The project primarily focuses on advanced frontend UI/UX, animation systems, and interactive visualization rather than backend-heavy functionality.
+
+2. Product Vision
+
+To create a visually immersive digital experience that allows users to explore the engineering of a Formula One car as if they are dissecting a machine piece by piece.
+
+The platform aims to transform complex motorsport engineering concepts into interactive visual narratives.
+
+3. Objectives
+Primary Objectives:
+
+Demonstrate advanced frontend development skills
+Showcase 3D web interaction using WebGL
+Create a portfolio-level UI/UX experience
+Educate users about Formula One technology visually
+
+Secondary Objectives:
+
+Provide information about the current F1 driver grid
+Showcase the global race calendar
+Highlight the history and evolution of the sport
+
+4. Target Audience
+Primary Audience:
+
+Motorsport enthusiasts
+
+UI/UX designers
+
+Web developers
+
+Recruiters evaluating frontend portfolios
+
+Secondary Audience:
+
+Students interested in motorsport engineering
+
+Casual sports fans curious about F1 technology
+
+5. Core Features
+
+5.1 Interactive 3D Formula One Car
+
+The centerpiece of the website is a fully interactive 3D Formula One car model.
+
+Users can explore the car and interact with its components in real time.
+
+Capabilities
+
+Drag to rotate the car
+
+Zoom in on components
+
+Hover interactions highlighting parts
+
+Scroll-driven camera transitions
+
+Component information panels
+
+Technology
+
+React
+
+Three.js
+
+React Three Fiber
+
+5.2 Active Aerodynamics Simulation
+
+The 2026 regulations introduce active aerodynamic systems that allow wings to adjust dynamically.
+
+Modes
+
+Corner Mode
+
+Increased downforce
+
+Higher wing angles
+
+Straight Mode
+
+Reduced drag
+
+Flatter wing positioning
+
+User Interaction
+
+Users can toggle between aerodynamic modes to see:
+
+wing position changes
+
+airflow behavior differences
+
+drag vs downforce visualization
+
+5.3 Hybrid Energy System Visualization
+
+The modern F1 power unit combines combustion and electric energy deployment.
+
+The platform will simulate different energy deployment modes.
+
+Overtake Mode
+
+Increased electric power deployment
+
+Visual speed indicators
+
+Battery drain animation
+
+Boost Mode
+
+Maximum hybrid power output
+
+Power flow animation through drivetrain
+
+Recharge Mode
+
+Energy regeneration during braking
+
+Battery recharge visualization
+
+5.4 Aerodynamics Visualization
+
+Airflow will be represented using particle simulations flowing over the car surface.
+
+Visualization Modes
+
+High downforce airflow
+
+Low drag airflow
+
+This feature helps users understand the aerodynamic principles behind Formula One design.
+
+5.5 Exploded Engineering View
+
+Users can break the car into its main engineering components.
+
+Components Included
+
+Front wing
+
+Halo
+
+Sidepods
+
+Power unit
+
+Gearbox
+
+Rear wing
+
+Diffuser
+
+Each component will contain explanatory text and interactive highlights.
+
+5.6 2026 Regulation Comparison
+
+The website will include a visual comparison between previous generation cars and the upcoming 2026 regulation cars.
+
+Differences Highlighted
+
+Reduced vehicle size
+
+Lighter chassis
+
+Active aerodynamics
+
+Increased electric power deployment
+
+Sustainable fuel systems
+
+A slider interface will allow users to compare the two designs.
+
+5.7 Current Driver Grid
+
+The platform will showcase profiles of the current drivers competing in Formula One.
+
+Example drivers include:
+
+Max Verstappen
+
+Lewis Hamilton
+
+Charles Leclerc
+
+Lando Norris
+
+Fernando Alonso
+
+UI Features
+
+animated driver cards
+
+hover interactions
+
+expandable statistics panels
+
+team color theming
+
+5.8 Race Calendar
+
+An interactive map will showcase major Formula One races around the world.
+
+Example events include:
+
+Monaco Grand Prix
+
+British Grand Prix
+
+Italian Grand Prix
+
+Users can explore race locations and track information.
+
+5.9 Formula One History Timeline
+
+A visual timeline will highlight key moments in the evolution of the sport.
+
+Legendary drivers featured may include:
+
+Ayrton Senna
+Michael Schumacher
+Lewis Hamilton
+
+The timeline will use scroll-based animations to move through different eras.
+
+6. User Experience Design
+
+The website will adopt a cinematic storytelling approach inspired by modern product launch pages.
+
+UX Principles:
+
+immersive scroll interactions
+minimalistic layout
+micro-interactions and hover effects
+visual storytelling through animations
+
+7. Animation & Interaction Strategy
+
+Animations will play a central role in the experience.
+
+Examples include:
+scroll-based model rotations
+aerodynamic particle flows
+wing movement animations
+exploded view transitions
+interactive hover highlights
+
+8. Technical Architecture
+Frontend Framework:
+React
+
+3D Rendering:
+
+Three.js
+React Three Fiber
+
+Animation Libraries:
+
+GSAP
+Framer Motion
+
+Styling:
+
+Tailwind CSS
+
+Performance Optimizations:
+
+compressed GLB 3D models
+lazy loading heavy assets
+GPU optimized WebGL rendering
+
+9. Non-Functional Requirements
+Performance:
+3D scenes must load within 2–3 seconds.
+
+Responsiveness:
+The website should support:
+desktop
+tablet
+limited mobile support
+
+Accessibility:
+
+keyboard navigation
+readable contrast ratios
+fallback content for unsupported browsers
+
+10. Success Metrics
+
+The project will be successful if it demonstrates:
+
+smooth animation performance
+
+strong visual storytelling
+
+high engagement with interactive elements
+
+portfolio-level UI/UX quality
+
+11. Risks & Challenges
+
+Potential challenges include:
+
+heavy 3D rendering impacting performance
+large asset sizes
+browser compatibility issues
+Mitigation strategies include asset compression and progressive loading.
+
+12. Future Enhancements
+
+Potential expansions include:
+
+live race telemetry
+pit stop simulation
+driver telemetry dashboards
+VR viewing mode
+interactive race strategy simulation
+
+Project Summary
+
+Formula Decoded aims to transform the engineering complexity of Formula One into a visually engaging interactive experience. By combining modern frontend technologies, immersive 3D graphics, and storytelling-driven UI design, the platform will provide users with a unique way to explore the machines behind the fastest motorsport in the world.

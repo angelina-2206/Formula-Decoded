@@ -28,7 +28,7 @@ export default function HomePage() {
         <PowerUnitSection />
       </div>
 
-      <div id="race-control">
+      <div>
         <TelemetrySection />
       </div>
 

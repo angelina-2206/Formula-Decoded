@@ -496,3 +496,1100 @@ body {
   max-width: 560px;
   line-height: 1.7;
 }
+
+/* ============================================
+   PIT WALL INTERFACE — F1 AESTHETIC
+   ============================================ */
+
+.pitwall-section {
+  background: #050506;
+  min-height: 100vh;
+  padding: 5rem 0 4rem;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Scanline overlay on whole section */
+.pitwall-section::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.06) 2px,
+    rgba(0, 0, 0, 0.06) 4px
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+.pitwall-ambient-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 600px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Header Bar ── */
+.pitwall-header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.pitwall-header-right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.pitwall-clock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.pitwall-clock-label {
+  font-family: var(--font-display);
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.pitwall-clock-time {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.8);
+  font-variant-numeric: tabular-nums;
+}
+
+.pitwall-status-badge {
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  padding: 0.4rem 1rem;
+  border: 1px solid;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+/* ── Config Bar ── */
+.pitwall-config-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  padding: 1.5rem 2rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  position: relative;
+  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+}
+
+/* Corner accent marks */
+.pitwall-config-bar::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40px;
+  height: 2px;
+  background: var(--color-red);
+}
+
+.pitwall-config-bar::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 40px;
+  background: var(--color-red);
+}
+
+.pitwall-config-selectors {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.pitwall-config-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.pitwall-config-label {
+  font-family: var(--font-display);
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.35);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.pitwall-select {
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.55rem 0.75rem;
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  font-weight: 500;
+  min-width: 160px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%);
+  appearance: none;
+}
+
+.pitwall-select:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.pitwall-select:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Boot Button ── */
+.pitwall-boot-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 2rem;
+  background: var(--team-color, var(--color-red));
+  color: #fff;
+  border: none;
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.pitwall-boot-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.15) 0%,
+    transparent 50%
+  );
+  pointer-events: none;
+}
+
+.pitwall-boot-btn:hover:not(:disabled) {
+  filter: brightness(1.2);
+  box-shadow: 0 0 30px color-mix(in srgb, var(--team-color, var(--color-red)) 40%, transparent);
+}
+
+.pitwall-boot-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.pitwall-boot-btn--active {
+  background: transparent;
+  border: 1px solid var(--color-red);
+  color: var(--color-red);
+}
+
+.pitwall-boot-btn--active:hover:not(:disabled) {
+  background: rgba(225, 6, 0, 0.1);
+  box-shadow: 0 0 20px rgba(225, 6, 0, 0.3);
+}
+
+.pitwall-boot-btn-icon {
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+/* ── Boot Overlay ── */
+.pitwall-boot-overlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6rem 2rem;
+  gap: 2rem;
+}
+
+.pitwall-boot-line {
+  width: 200px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.06);
+  position: relative;
+  overflow: hidden;
+}
+
+.pitwall-boot-line::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, var(--color-red), transparent);
+  animation: boot-scan 1.2s ease-in-out infinite;
+}
+
+@keyframes boot-scan {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 200%;
+  }
+}
+
+.pitwall-boot-text {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
+  color: rgba(255, 255, 255, 0.4);
+  animation: blink 1s step-end infinite;
+}
+
+/* ── Rev Lights ── */
+.pitwall-rev-lights {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding: 0.75rem 0;
+  margin-bottom: 4px;
+}
+
+.pitwall-rev-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  transition: all 0.08s ease;
+}
+
+/* ── Team Stripe ── */
+.pitwall-team-stripe {
+  height: 3px;
+  margin-bottom: 2px;
+  border-radius: 1px;
+}
+
+/* ── Panel System ── */
+.pitwall-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr 300px;
+  gap: 3px;
+  min-height: 700px;
+}
+
+.pitwall-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.pitwall-col--center {
+  /* Center column stretches taller */
+}
+
+.pitwall-panel {
+  background: #0a0a0c;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 1.5rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  /* Carbon fiber texture */
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.008) 0px,
+      rgba(255, 255, 255, 0.008) 1px,
+      transparent 1px,
+      transparent 8px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(255, 255, 255, 0.008) 0px,
+      rgba(255, 255, 255, 0.008) 1px,
+      transparent 1px,
+      transparent 8px
+    );
+  background-color: #0a0a0c;
+}
+
+/* Corner accent on each panel */
+.pitwall-panel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 30px;
+  height: 1.5px;
+  background: var(--color-red);
+  z-index: 1;
+}
+
+.pitwall-panel::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 1.5px;
+  height: 30px;
+  background: var(--color-red);
+  z-index: 1;
+}
+
+.pitwall-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: nowrap;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.pitwall-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.pitwall-live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #e10600;
+  animation: pulse-red 1.5s ease-in-out infinite;
+  box-shadow: 0 0 6px #e10600;
+}
+
+.pitwall-panel-tag {
+  font-family: var(--font-display);
+  font-size: 0.5rem;
+  letter-spacing: 0.15em;
+  padding: 0.2rem 0.5rem;
+  border: 1px solid;
+  border-radius: 2px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Sectors ── */
+.pitwall-sectors {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.pitwall-sector-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pitwall-sector-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+.pitwall-sector-name {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  flex-shrink: 0;
+}
+
+.pitwall-sector-time {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.pitwall-badge {
+  font-size: 0.5rem;
+  padding: 1px 5px;
+  border-radius: 2px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.pitwall-sector-bar-bg {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.pitwall-sector-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  box-shadow: 0 0 6px currentColor;
+}
+
+/* ── Lap History ── */
+.pitwall-lap-history {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.pitwall-lap-history-title {
+  font-family: var(--font-display);
+  font-size: 0.55rem;
+  letter-spacing: 0.18em;
+  color: rgba(255, 255, 255, 0.35);
+  margin-bottom: 0.75rem;
+}
+
+.pitwall-lap-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  padding: 0.4rem 0.5rem;
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.35);
+  border-left: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.pitwall-lap-row--fastest {
+  color: #a855f7;
+  background: rgba(168, 85, 247, 0.06);
+  border-left-color: #a855f7;
+}
+
+.pitwall-fastest-badge {
+  font-family: var(--font-display);
+  font-size: 0.45rem;
+  letter-spacing: 0.15em;
+  padding: 2px 6px;
+  background: #a855f7;
+  color: #000;
+  border-radius: 2px;
+  font-weight: 800;
+}
+
+/* ── GPS Tracker ── */
+.pitwall-panel--gps {
+  flex: 0 0 auto;
+}
+
+.pitwall-gps-content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  padding: 1rem 0;
+}
+
+.pitwall-track-svg {
+  opacity: 0.9;
+}
+
+.pitwall-position {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+}
+
+.pitwall-position-label {
+  font-family: var(--font-display);
+  font-size: 0.5rem;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.pitwall-position-number {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 900;
+  line-height: 1;
+  background: linear-gradient(180deg, #fff, rgba(255, 255, 255, 0.6));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.pitwall-gap-label {
+  font-family: var(--font-display);
+  font-size: 0.45rem;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.3);
+  margin-top: 0.5rem;
+}
+
+.pitwall-gap-value {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #22c55e;
+}
+
+/* ── Track Conditions ── */
+.pitwall-track-conditions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.pitwall-condition-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 4px;
+}
+
+.pitwall-condition-item span:first-child {
+  font-family: var(--font-display);
+  font-size: 0.45rem;
+  letter-spacing: 0.15em;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.pitwall-condition-item span:last-child {
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ── Speed Block ── */
+.pitwall-panel--hero {
+  padding: 2rem;
+}
+
+.pitwall-speed-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.pitwall-speed-block {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.pitwall-speed-value {
+  font-family: var(--font-display);
+  font-size: clamp(3.5rem, 6vw, 5.5rem);
+  font-weight: 900;
+  line-height: 0.85;
+  background: linear-gradient(180deg, #ffffff, rgba(255, 255, 255, 0.65));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-variant-numeric: tabular-nums;
+}
+
+.pitwall-speed-unit {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.3);
+  letter-spacing: 0.1em;
+}
+
+.pitwall-gear-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.pitwall-gear-value {
+  font-family: var(--font-display);
+  font-size: 3rem;
+  font-weight: 900;
+  line-height: 0.9;
+  filter: drop-shadow(0 0 12px currentColor);
+}
+
+.pitwall-gear-label {
+  font-family: var(--font-display);
+  font-size: 0.5rem;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* ── Velocity Chart ── */
+.pitwall-velocity-chart {
+  height: 140px;
+  position: relative;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  padding-bottom: 1rem;
+}
+
+/* ── Input Bars ── */
+.pitwall-inputs {
+  display: flex;
+  gap: 2rem;
+}
+
+.pitwall-input-bar {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pitwall-input-header {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-size: 0.55rem;
+  letter-spacing: 0.15em;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.pitwall-input-track {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.pitwall-input-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.1s ease;
+}
+
+/* ── ERS Panel ── */
+.pitwall-panel--ers {
+  padding: 1.5rem 2rem;
+}
+
+.pitwall-ers-bar-section {
+  margin-bottom: 1.25rem;
+}
+
+.pitwall-ers-bar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 0.5rem;
+}
+
+.pitwall-ers-segments {
+  display: flex;
+  gap: 4px;
+  height: 28px;
+}
+
+.pitwall-ers-seg {
+  flex: 1;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.pitwall-ers-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  margin-top: auto;
+}
+
+.pitwall-ers-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 0.25rem;
+  border-radius: 4px;
+  gap: 0.3rem;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.pitwall-ers-stat-label {
+  font-family: var(--font-display);
+  font-size: 0.5rem;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.4);
+  white-space: nowrap;
+}
+
+.pitwall-ers-stat-value {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+/* ── Tire Management ── */
+.pitwall-panel--tires {
+  flex: 1;
+}
+
+.pitwall-tire-layout {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  padding: 1rem 0;
+}
+
+.pitwall-car-outline {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+}
+
+.pitwall-tires-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.pitwall-tires-row {
+  display: flex;
+  justify-content: center;
+  gap: 2.5rem;
+}
+
+.pitwall-tire-gauge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+}
+
+.pitwall-tire-ring {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.pitwall-tire-pct {
+  position: absolute;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.pitwall-tire-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  font-family: var(--font-display);
+  font-size: 0.55rem;
+  white-space: nowrap;
+}
+
+.pitwall-tire-label {
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.4);
+  white-space: nowrap;
+}
+
+/* ── Pit Strategy ── */
+.pitwall-pit-strategy {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.pitwall-pit-strategy-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-size: 0.55rem;
+  letter-spacing: 0.15em;
+  color: rgba(255, 255, 255, 0.35);
+  margin-bottom: 0.75rem;
+}
+
+.pitwall-pit-strategy-value {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.pitwall-pit-strategy-bar {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 3px;
+  overflow: visible;
+  position: relative;
+}
+
+.pitwall-pit-strategy-fill {
+  height: 100%;
+  border-radius: 3px;
+}
+
+.pitwall-pit-marker {
+  position: absolute;
+  top: -8px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pitwall-pit-marker-line {
+  width: 2px;
+  height: 22px;
+  background: #fff;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.5);
+}
+
+.pitwall-pit-marker span {
+  font-family: var(--font-display);
+  font-size: 0.45rem;
+  letter-spacing: 0.15em;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 4px;
+}
+
+/* ── Standings ── */
+.pitwall-panel--standings {
+  flex: 0 0 auto;
+}
+
+.pitwall-standings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pitwall-standing-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.6rem;
+  background: rgba(255, 255, 255, 0.02);
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  border-left: 2px solid transparent;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.pitwall-standing-row--highlight {
+  background: color-mix(in srgb, var(--highlight-color, var(--color-red)) 8%, transparent);
+  border-left-color: var(--highlight-color, var(--color-red));
+}
+
+.pitwall-standing-pos {
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  width: 2rem;
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.pitwall-standing-row--highlight .pitwall-standing-pos {
+  color: #fff;
+}
+
+.pitwall-standing-name {
+  flex: 1;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: rgba(255, 255, 255, 0.7);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pitwall-standing-row--highlight .pitwall-standing-name {
+  color: #fff;
+}
+
+.pitwall-standing-gap {
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* ── Idle State ── */
+.pitwall-idle {
+  display: flex;
+  justify-content: center;
+  padding: 6rem 2rem;
+}
+
+.pitwall-idle-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  opacity: 0.5;
+}
+
+.pitwall-idle-text {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  letter-spacing: 0.25em;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.pitwall-idle-subtext {
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.2);
+}
+
+/* ── Responsive ── */
+@media (max-width: 1400px) {
+  .pitwall-grid {
+    grid-template-columns: 260px 1fr 280px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .pitwall-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .pitwall-col:last-child {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px;
+  }
+}
+
+@media (max-width: 768px) {
+  .pitwall-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pitwall-col:last-child {
+    grid-template-columns: 1fr;
+  }
+
+  .pitwall-header-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .pitwall-config-bar {
+    flex-direction: column;
+    clip-path: none;
+  }
+
+  .pitwall-config-selectors {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .pitwall-select {
+    width: 100%;
+  }
+
+  .pitwall-boot-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .pitwall-rev-lights {
+    gap: 4px;
+  }
+
+  .pitwall-rev-dot {
+    width: 10px;
+    height: 10px;
+  }
+
+  .pitwall-inputs {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .pitwall-speed-value {
+    font-size: 3rem;
+  }
+
+  .pitwall-tires-row {
+    gap: 1.5rem;
+  }
+}

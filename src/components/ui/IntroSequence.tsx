@@ -1,99 +1,251 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
+import { motion, AnimatePresence } from "framer-motion";
 
-export default function IntroSequence({ onComplete }: { onComplete: () => void }) {
+// ── F1 Light Gantry ────────────────────────────────────────────
+// 5 columns × 4 bulbs each — matches the real FIA starting gantry
+
+const COLUMNS = 5;
+const BULBS_PER_COLUMN = 4;
+const LIGHT_INTERVAL = 1.0; // seconds between each column lighting up
+const MIN_HOLD = 1.2; // minimum seconds all lights stay on before blackout
+const MAX_HOLD = 2.8; // maximum — randomized for tension
+
+function LightGantry({ litColumns }: { litColumns: number }) {
+    return (
+        <div className="f1-gantry">
+            {Array.from({ length: COLUMNS }).map((_, colIdx) => (
+                <div key={colIdx} className="f1-light-column">
+                    {Array.from({ length: BULBS_PER_COLUMN }).map((_, bulbIdx) => (
+                        <div
+                            key={bulbIdx}
+                            className={`f1-light-bulb${colIdx < litColumns ? " f1-light-bulb--on" : ""}`}
+                        />
+                    ))}
+                </div>
+            ))}
+        </div>
+    );
+}
+
+// ── Spark Particles ────────────────────────────────────────────
+
+function SparkBurst({ active }: { active: boolean }) {
+    if (!active) return null;
+
+    return (
+        <div
+            style={{
+                position: "absolute",
+                inset: 0,
+                overflow: "hidden",
+                pointerEvents: "none",
+                zIndex: 30,
+            }}
+        >
+            {Array.from({ length: 30 }).map((_, i) => {
+                const angle = Math.random() * 360;
+                const distance = 100 + Math.random() * 300;
+                const size = 1 + Math.random() * 3;
+                const duration = 0.4 + Math.random() * 0.8;
+                const x = Math.cos((angle * Math.PI) / 180) * distance;
+                const y = Math.sin((angle * Math.PI) / 180) * distance;
+
+                return (
+                    <motion.div
+                        key={i}
+                        initial={{
+                            x: "50vw",
+                            y: "35%",
+                            opacity: 1,
+                            scale: 1,
+                        }}
+                        animate={{
+                            x: `calc(50vw + ${x}px)`,
+                            y: `calc(35% + ${y}px)`,
+                            opacity: 0,
+                            scale: 0,
+                        }}
+                        transition={{
+                            duration,
+                            ease: "easeOut",
+                            delay: Math.random() * 0.15,
+                        }}
+                        style={{
+                            position: "absolute",
+                            width: size,
+                            height: size,
+                            borderRadius: "50%",
+                            background:
+                                i % 3 === 0
+                                    ? "#FF6622"
+                                    : i % 3 === 1
+                                      ? "#FF3333"
+                                      : "#FFAA44",
+                            boxShadow: `0 0 ${size * 3}px ${i % 3 === 0 ? "#FF6622" : "#FF3333"}`,
+                        }}
+                    />
+                );
+            })}
+        </div>
+    );
+}
+
+// ── Typewriter Text ────────────────────────────────────────────
+
+function TypewriterTagline({
+    text,
+    show,
+    onComplete,
+}: {
+    text: string;
+    show: boolean;
+    onComplete?: () => void;
+}) {
+    const [displayed, setDisplayed] = useState("");
+    const [cursorVisible, setCursorVisible] = useState(true);
+
+    useEffect(() => {
+        if (!show) {
+            setDisplayed("");
+            return;
+        }
+
+        let idx = 0;
+        const interval = setInterval(() => {
+            idx++;
+            setDisplayed(text.slice(0, idx));
+            if (idx >= text.length) {
+                clearInterval(interval);
+                // Hide cursor after typing completes
+                setTimeout(() => {
+                    setCursorVisible(false);
+                    onComplete?.();
+                }, 800);
+            }
+        }, 40);
+
+        return () => clearInterval(interval);
+    }, [show, text, onComplete]);
+
+    if (!show) return null;
+
+    return (
+        <span>
+            {displayed}
+            {cursorVisible && <span className="typewriter-cursor" />}
+        </span>
+    );
+}
+
+// ── Main IntroSequence Component ───────────────────────────────
+
+export default function IntroSequence({
+    onComplete,
+}: {
+    onComplete: () => void;
+}) {
     const containerRef = useRef<HTMLDivElement>(null);
     const [shouldPlay, setShouldPlay] = useState<boolean | null>(null);
+    const [litColumns, setLitColumns] = useState(0);
+    const [lightsOut, setLightsOut] = useState(false);
+    const [showSparks, setShowSparks] = useState(false);
+    const [showLogo, setShowLogo] = useState(false);
+    const [showTagline, setShowTagline] = useState(false);
+    const [phase, setPhase] = useState<"lights" | "blackout" | "logo" | "done">("lights");
+    const [shaking, setShaking] = useState(false);
+
+    const stableOnComplete = useCallback(() => {
+        onComplete();
+    }, [onComplete]);
 
     useEffect(() => {
         const hasPlayed = sessionStorage.getItem("introPlayed");
         if (hasPlayed) {
             setShouldPlay(false);
-            onComplete();
+            stableOnComplete();
         } else {
             setShouldPlay(true);
             sessionStorage.setItem("introPlayed", "true");
         }
-    }, [onComplete]);
+    }, [stableOnComplete]);
 
+    // ── Lights Sequence ──
+    useEffect(() => {
+        if (!shouldPlay) return;
+
+        // Sequentially light up each column
+        const timeouts: NodeJS.Timeout[] = [];
+
+        for (let col = 1; col <= COLUMNS; col++) {
+            timeouts.push(
+                setTimeout(() => {
+                    setLitColumns(col);
+                }, col * LIGHT_INTERVAL * 1000)
+            );
+        }
+
+        // All 5 lit — hold for random duration, then lights out
+        const holdDuration =
+            MIN_HOLD + Math.random() * (MAX_HOLD - MIN_HOLD);
+        const lightsOutTime =
+            COLUMNS * LIGHT_INTERVAL * 1000 + holdDuration * 1000;
+
+        timeouts.push(
+            setTimeout(() => {
+                // LIGHTS OUT!
+                setLitColumns(0);
+                setLightsOut(true);
+                setShaking(true);
+                setShowSparks(true);
+
+                // Stop shake after 300ms
+                setTimeout(() => setShaking(false), 300);
+                // Stop sparks after 1s
+                setTimeout(() => setShowSparks(false), 1000);
+
+                // Brief blackout, then show logo
+                setTimeout(() => {
+                    setPhase("logo");
+                    setShowLogo(true);
+                }, 500);
+
+                // Start tagline after logo appears
+                setTimeout(() => {
+                    setShowTagline(true);
+                }, 1200);
+
+                // Transition out
+                setTimeout(() => {
+                    setPhase("done");
+                }, 3500);
+            }, lightsOutTime)
+        );
+
+        return () => timeouts.forEach(clearTimeout);
+    }, [shouldPlay]);
+
+    // ── Fade out and complete ──
     useGSAP(
         () => {
-            if (!shouldPlay) return;
+            if (phase !== "done") return;
 
-            const tl = gsap.timeline({
+            gsap.to(containerRef.current, {
+                opacity: 0,
+                duration: 1.0,
+                ease: "power2.inOut",
                 onComplete: () => {
-                    // Fade out the entire overlay
-                    gsap.to(containerRef.current, {
-                        opacity: 0,
-                        duration: 0.8,
-                        ease: "power2.inOut",
-                        onComplete: () => {
-                            if (containerRef.current) containerRef.current.style.display = "none";
-                            onComplete();
-                            // Dispatch event for other components to know intro is done
-                            window.dispatchEvent(new Event("introComplete"));
-                        },
-                    });
+                    if (containerRef.current)
+                        containerRef.current.style.display = "none";
+                    stableOnComplete();
+                    window.dispatchEvent(new Event("introComplete"));
                 },
             });
-
-            // Stage 1: Grid Lights turn on sequentially
-            tl.to(".grid-light", {
-                backgroundColor: "#FF0033",
-                boxShadow: "0 0 20px #FF0033, 0 0 40px #FF0033",
-                duration: 0.1,
-                stagger: 0.4,
-                ease: "none",
-            })
-                // Pause while all 5 lights are on
-                .to({}, { duration: 0.8 })
-                // Lights Out
-                .to(".grid-light-container", {
-                    opacity: 0,
-                    duration: 0.1,
-                });
-
-            // Stage 2: Car dash & Logo reveal
-            tl.addLabel("carDash")
-                .fromTo(
-                    ".intro-car",
-                    { x: "-20vw", opacity: 1 },
-                    { x: "120vw", duration: 0.6, ease: "power2.in" },
-                    "carDash"
-                )
-                // Motion blur lines
-                .fromTo(
-                    ".speed-line",
-                    { x: "-100%", opacity: 0 },
-                    { x: "100%", opacity: 0.8, duration: 0.4, stagger: 0.05, ease: "power1.inOut" },
-                    "carDash+=0.2"
-                );
-
-            // Logo Reveal using CSS Clip Path (sliding in from left as car passes)
-            tl.fromTo(
-                ".logo-word-1",
-                { clipPath: "inset(0 100% 0 0)" },
-                { clipPath: "inset(0 0% 0 0)", duration: 0.5, ease: "power2.out" },
-                "carDash+=0.3"
-            ).fromTo(
-                ".logo-word-2",
-                { clipPath: "inset(0 100% 0 0)" },
-                { clipPath: "inset(0 0% 0 0)", duration: 0.5, ease: "power2.out" },
-                "carDash+=0.4"
-            ).fromTo(
-                ".logo-tagline",
-                { opacity: 0, y: 10 },
-                { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
-                "carDash+=0.6"
-            )
-                // Hold logo
-                .to({}, { duration: 1.2 });
-
         },
-        { scope: containerRef, dependencies: [shouldPlay] }
+        { scope: containerRef, dependencies: [phase] }
     );
 
     if (shouldPlay === null || !shouldPlay) return null;
@@ -104,132 +256,257 @@ export default function IntroSequence({ onComplete }: { onComplete: () => void }
             style={{
                 position: "fixed",
                 inset: 0,
-                zIndex: 9999, // Above everything
-                background: "#050505",
+                zIndex: 9999,
+                background: "#030304",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
                 overflow: "hidden",
+                animation: shaking ? "screen-shake 0.3s ease-in-out" : "none",
             }}
         >
-            {/* Asphalt Texture */}
+            {/* ── Asphalt Noise Texture ── */}
             <div
                 style={{
                     position: "absolute",
                     inset: 0,
-                    opacity: 0.05,
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+                    opacity: 0.04,
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
                     pointerEvents: "none",
                 }}
             />
 
-            {/* Grid Lights */}
+            {/* ── Grid Slot Markings (perspective floor) ── */}
             <div
-                className="grid-light-container"
                 style={{
                     position: "absolute",
-                    top: "15%",
-                    display: "flex",
-                    gap: "2rem",
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    height: "40%",
+                    background: `
+                        repeating-linear-gradient(
+                            90deg,
+                            transparent 0,
+                            transparent 80px,
+                            rgba(255,255,255,0.03) 80px,
+                            rgba(255,255,255,0.03) 82px
+                        )
+                    `,
+                    transform: "perspective(600px) rotateX(55deg)",
+                    transformOrigin: "bottom center",
+                    pointerEvents: "none",
+                    opacity: 0.5,
                 }}
-            >
-                {[0, 1, 2, 3, 4].map((i) => (
-                    <div
-                        key={i}
-                        className="grid-light"
+            />
+
+            {/* ── Ambient Red Ground Glow (when lights are on) ── */}
+            <AnimatePresence>
+                {litColumns > 0 && !lightsOut && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 0.6 }}
+                        exit={{ opacity: 0, transition: { duration: 0.1 } }}
                         style={{
-                            width: "40px",
-                            height: "40px",
-                            borderRadius: "50%",
-                            backgroundColor: "#222",
-                            border: "4px solid #111",
-                            boxShadow: "inset 0 0 10px rgba(0,0,0,0.8)",
+                            position: "absolute",
+                            top: "30%",
+                            left: "50%",
+                            transform: "translateX(-50%)",
+                            width: `${30 + litColumns * 8}%`,
+                            height: "60%",
+                            background:
+                                "radial-gradient(ellipse at 50% 30%, rgba(255,0,0,0.12) 0%, rgba(180,0,0,0.06) 40%, transparent 70%)",
+                            pointerEvents: "none",
+                            animation: "ground-glow 2s ease-in-out infinite",
                         }}
                     />
-                ))}
-            </div>
+                )}
+            </AnimatePresence>
 
-            {/* Logo Container */}
-            <div style={{ position: "relative", zIndex: 10, textAlign: "center" }}>
-                <h1
-                    style={{
-                        fontFamily: "var(--font-display)",
-                        fontSize: "clamp(3rem, 10vw, 8rem)",
-                        fontWeight: 900,
-                        fontStyle: "italic",
-                        lineHeight: 0.9,
-                        letterSpacing: "0.02em",
-                        textTransform: "uppercase",
-                        margin: 0,
-                        display: "flex",
-                        flexDirection: "column",
-                    }}
-                >
-                    <span className="logo-word-1" style={{ color: "#FFF" }}>Formula</span>
-                    <span
-                        className="logo-word-2"
-                        style={{
-                            color: "transparent",
-                            WebkitTextStroke: "2px #FF0033",
-                        }}
-                    >
-                        Decoded
-                    </span>
-                </h1>
-                <p
-                    className="logo-tagline"
-                    style={{
-                        fontFamily: "var(--font-mono)",
-                        fontSize: "0.9rem",
-                        color: "#888",
-                        marginTop: "1.5rem",
-                        letterSpacing: "0.2em",
-                        textTransform: "uppercase",
-                    }}
-                >
-                    Breaking Down the Technology of Modern Formula One
-                </p>
-            </div>
-
-            {/* Rushing Car Silhouette */}
-            <div
-                className="intro-car"
-                style={{
-                    position: "absolute",
-                    bottom: "35%",
-                    left: 0,
-                    opacity: 0,
-                    zIndex: 5,
-                    filter: "drop-shadow(-20px 0px 10px rgba(255,0,51,0.6)) blur(1px)",
-                }}
-            >
-                <svg viewBox="0 0 500 120" fill="#111" width="600px">
-                    <path d="M70,80 L90,80 L95,60 L140,55 L180,45 L220,40 L260,35 L300,45 L340,50 L400,60 L450,70 L480,80 L480,95 L450,95 C450,110 420,110 420,95 L140,95 C140,110 110,110 110,95 L70,95 Z" />
-                    <circle cx="125" cy="95" r="20" fill="#000" />
-                    <circle cx="435" cy="95" r="20" fill="#000" />
-                    <rect x="60" y="40" width="10" height="40" fill="#FF0033" />
-                    <rect x="40" y="30" width="40" height="10" fill="#FF0033" />
-                </svg>
-            </div>
-
-            {/* Speed Lines */}
-            {[0, 1, 2, 3].map((i) => (
+            {/* ── Heat Shimmer Overlay ── */}
+            {litColumns > 2 && !lightsOut && (
                 <div
-                    key={`line-${i}`}
-                    className="speed-line"
                     style={{
                         position: "absolute",
-                        bottom: `${30 + i * 5}%`,
-                        left: 0,
-                        width: "100%",
-                        height: "2px",
-                        background: "linear-gradient(90deg, transparent, #FF0033, transparent)",
-                        opacity: 0,
-                        zIndex: 4,
+                        top: "25%",
+                        left: "30%",
+                        right: "30%",
+                        height: "30%",
+                        animation: "heat-shimmer 3s ease-in-out infinite",
+                        background: "transparent",
+                        pointerEvents: "none",
+                        zIndex: 5,
+                        backdropFilter: "blur(0.3px)",
                     }}
                 />
-            ))}
+            )}
+
+            {/* ── Lights Out Flash ── */}
+            <AnimatePresence>
+                {lightsOut && phase === "lights" && (
+                    <motion.div
+                        initial={{ opacity: 0.9 }}
+                        animate={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        style={{
+                            position: "absolute",
+                            inset: 0,
+                            background:
+                                "radial-gradient(ellipse at 50% 40%, rgba(255,255,255,0.15) 0%, transparent 60%)",
+                            pointerEvents: "none",
+                            zIndex: 20,
+                        }}
+                    />
+                )}
+            </AnimatePresence>
+
+            {/* ── Spark Particles on Lights Out ── */}
+            <SparkBurst active={showSparks} />
+
+            {/* ── F1 Light Gantry ── */}
+            <AnimatePresence>
+                {phase === "lights" && (
+                    <motion.div
+                        initial={{ opacity: 1 }}
+                        exit={{ opacity: 0, transition: { duration: 0.4 } }}
+                        style={{
+                            position: "absolute",
+                            top: "22%",
+                            zIndex: 10,
+                        }}
+                    >
+                        <LightGantry litColumns={litColumns} />
+
+                        {/* Gantry support poles (visual detail) */}
+                        <div
+                            style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                padding: "0 2rem",
+                            }}
+                        >
+                            {[0, 1].map((i) => (
+                                <div
+                                    key={i}
+                                    style={{
+                                        width: "3px",
+                                        height: "60px",
+                                        background:
+                                            "linear-gradient(180deg, #1a1a1e, #0a0a0a)",
+                                        boxShadow:
+                                            "1px 0 0 rgba(255,255,255,0.03)",
+                                    }}
+                                />
+                            ))}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* ── Logo Reveal (post-lights-out) ── */}
+            <AnimatePresence>
+                {showLogo && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.6, ease: "easeOut" }}
+                        style={{
+                            position: "relative",
+                            zIndex: 40,
+                            textAlign: "center",
+                        }}
+                    >
+                        <h1
+                            style={{
+                                fontFamily: "var(--font-display)",
+                                fontSize: "clamp(3rem, 10vw, 8rem)",
+                                fontWeight: 900,
+                                fontStyle: "italic",
+                                lineHeight: 0.9,
+                                letterSpacing: "0.02em",
+                                textTransform: "uppercase",
+                                margin: 0,
+                                display: "flex",
+                                flexDirection: "column",
+                            }}
+                        >
+                            <motion.span
+                                initial={{
+                                    opacity: 0,
+                                    y: 30,
+                                    filter: "blur(8px)",
+                                }}
+                                animate={{
+                                    opacity: 1,
+                                    y: 0,
+                                    filter: "blur(0px)",
+                                }}
+                                transition={{
+                                    duration: 0.7,
+                                    ease: [0.25, 0.46, 0.45, 0.94],
+                                }}
+                                style={{ color: "#FFF" }}
+                            >
+                                Formula
+                            </motion.span>
+                            <motion.span
+                                initial={{
+                                    opacity: 0,
+                                    y: 30,
+                                    filter: "blur(8px)",
+                                }}
+                                animate={{
+                                    opacity: 1,
+                                    y: 0,
+                                    filter: "blur(0px)",
+                                }}
+                                transition={{
+                                    duration: 0.7,
+                                    delay: 0.15,
+                                    ease: [0.25, 0.46, 0.45, 0.94],
+                                }}
+                                style={{
+                                    color: "transparent",
+                                    WebkitTextStroke: "2px #FF0033",
+                                }}
+                            >
+                                Decoded
+                            </motion.span>
+                        </h1>
+
+                        {/* Typewriter tagline */}
+                        <p
+                            style={{
+                                fontFamily: "var(--font-mono, var(--font-display))",
+                                fontSize: "clamp(0.65rem, 1.2vw, 0.9rem)",
+                                color: "#666",
+                                marginTop: "1.5rem",
+                                letterSpacing: "0.2em",
+                                textTransform: "uppercase",
+                                minHeight: "1.4em",
+                            }}
+                        >
+                            <TypewriterTagline
+                                text="The Technology Behind Formula One"
+                                show={showTagline}
+                            />
+                        </p>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* ── Subtle vignette ── */}
+            <div
+                style={{
+                    position: "absolute",
+                    inset: 0,
+                    background:
+                        "radial-gradient(ellipse at 50% 50%, transparent 50%, rgba(0,0,0,0.6) 100%)",
+                    pointerEvents: "none",
+                    zIndex: 1,
+                }}
+            />
         </div>
     );
 }

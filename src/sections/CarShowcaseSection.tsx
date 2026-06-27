@@ -1,194 +1,160 @@
 "use client";
 
-import { Suspense, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { ComponentInfo } from "@/components/3d/F1CarModel";
+import CarExplorerLeftPanel from "@/components/car-explorer/CarExplorerLeftPanel";
+import CarExplorerSpecCard from "@/components/car-explorer/CarExplorerSpecCard";
+import CarExplorerHotkeys from "@/components/car-explorer/CarExplorerHotkeys";
+import { type ViewMode, COMPONENTS } from "@/data/carExplorerData";
 
 const Scene = dynamic(() => import("@/components/3d/Scene"), { ssr: false });
 
 export default function CarShowcaseSection() {
-    const sectionRef = useRef<HTMLDivElement>(null);
-    const [hoveredComponent, setHoveredComponent] = useState<ComponentInfo | null>(null);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>("assembled");
+  const [explodeFactor, setExplodeFactor] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
 
-    return (
-        <section
-            id="car"
-            ref={sectionRef}
-            style={{
-                position: "relative",
-                minHeight: "100vh",
-                background: "var(--color-background)",
-                overflow: "hidden",
-            }}
-        >
-            {/* Section bg accent */}
-            <div className="carbon-bg" style={{ position: "absolute", inset: 0, opacity: 0.4 }} />
+  // ── Mode switching ──
+  const handleModeChange = useCallback((mode: ViewMode) => {
+    setViewMode(mode);
+    if (mode === "exploded") {
+      setExplodeFactor(0.65);
+    } else if (mode === "assembled") {
+      setExplodeFactor(0);
+      setSelectedIndex(-1);
+    } else if (mode === "xray") {
+      setExplodeFactor(0.3);
+    }
+  }, []);
 
-            <div className="container-xl section-padding" style={{ position: "relative", zIndex: 2 }}>
-                {/* Header */}
-                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: "2rem", marginBottom: "3rem" }}>
-                    <div>
-                        <motion.div
-                            initial={{ opacity: 0, x: -20 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true }}
-                            className="section-label"
-                        >
-                            <span />
-                            <span>Interactive 3D</span>
-                        </motion.div>
-                        <motion.h2
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.1 }}
-                            className="section-title"
-                        >
-                            Car Explorer
-                        </motion.h2>
-                    </div>
-                    <motion.p
-                        initial={{ opacity: 0 }}
-                        whileInView={{ opacity: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.2 }}
-                        className="section-subtitle"
-                        style={{ maxWidth: "360px" }}
-                    >
-                        Drag to rotate. Scroll to zoom. Click components to explore the engineering of a Formula One car.
-                    </motion.p>
+  // ── Deselect ──
+  const handleDeselect = useCallback(() => {
+    setSelectedIndex(-1);
+  }, []);
+
+  // ── Keyboard shortcuts ──
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      // Don't capture if user is typing in an input
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      )
+        return;
+
+      const key = e.key.toLowerCase();
+
+      if (key === "e") {
+        // Toggle explode
+        if (explodeFactor > 0.5) {
+          setExplodeFactor(0);
+          setViewMode("assembled");
+        } else {
+          setExplodeFactor(0.7);
+          setViewMode("exploded");
+        }
+      } else if (key === "r") {
+        // Reset camera — we just reset state; OrbitControls handles positioning
+        setSelectedIndex(-1);
+        setExplodeFactor(0);
+        setViewMode("assembled");
+      } else if (key === "x") {
+        // Toggle X-ray
+        if (viewMode === "xray") {
+          handleModeChange("assembled");
+        } else {
+          handleModeChange("xray");
+        }
+      } else if (key === "escape") {
+        handleDeselect();
+      } else {
+        const num = parseInt(key);
+        if (!isNaN(num) && num >= 1 && num <= 7) {
+          setSelectedIndex(num - 1);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [explodeFactor, viewMode, handleModeChange, handleDeselect]);
+
+  return (
+    <section
+      id="car"
+      ref={sectionRef}
+      className="car-explorer"
+    >
+      <div className="car-explorer-layout">
+        {/* Left Panel — Component Selector + Mode Toggle + Explode Slider */}
+        <CarExplorerLeftPanel
+          viewMode={viewMode}
+          explodeFactor={explodeFactor}
+          selectedIndex={selectedIndex}
+          onModeChange={handleModeChange}
+          onExplodeChange={setExplodeFactor}
+          onSelectComponent={setSelectedIndex}
+        />
+
+        {/* Center — 3D Canvas */}
+        <div className="ce-canvas-wrap">
+          <Suspense
+            fallback={
+              <div className="ce-loading">
+                <div className="ce-loading-title">
+                  CAR <span>EXPLORER</span>
                 </div>
+                <div className="ce-loading-bar-wrap">
+                  <div
+                    className="ce-loading-bar"
+                    style={{ width: "60%" }}
+                  />
+                </div>
+                <div className="ce-loading-text">
+                  LOADING 3D ENGINE
+                </div>
+              </div>
+            }
+          >
+            <Scene
+              viewMode={viewMode}
+              explodeFactor={explodeFactor}
+              selectedIndex={selectedIndex}
+              onSelectComponent={setSelectedIndex}
+            />
+          </Suspense>
 
-                {/* 3D Canvas Area */}
-                <motion.div
-                    initial={{ opacity: 0, y: 40 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.8 }}
-                    style={{
-                        position: "relative",
-                        height: "60vh",
-                        minHeight: "400px",
-                        background: "var(--color-surface)",
-                        border: "1px solid var(--color-border)",
-                        borderRadius: "var(--radius-lg)",
-                        overflow: "hidden",
-                    }}
-                >
-                    <Suspense
-                        fallback={
-                            <div style={{
-                                display: "flex",
-                                flexDirection: "column",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                height: "100%",
-                                gap: "1rem",
-                            }}>
-                                <div style={{
-                                    width: "40px", height: "40px",
-                                    border: "2px solid var(--color-border)",
-                                    borderTopColor: "var(--color-red)",
-                                    borderRadius: "50%",
-                                    animation: "spin-slow 1s linear infinite",
-                                }} />
-                                <span className="hud-label">Loading 3D Scene</span>
-                            </div>
-                        }
-                    >
-                        <Scene onHoverChange={setHoveredComponent} />
-                    </Suspense>
+          {/* HUD Overlays */}
+          <div className="ce-controls-overlay">
+            <div>DRAG · ROTATE</div>
+            <div>SCROLL · ZOOM</div>
+            <div>RIGHT-DRAG · PAN</div>
+            <div>CLICK · INSPECT</div>
+          </div>
 
-                    {/* Component Info Panel Overlay */}
-                    <AnimatePresence>
-                        {hoveredComponent && (
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                                transition={{ duration: 0.2, ease: "easeOut" }}
-                                style={{
-                                    position: "absolute",
-                                    bottom: "2rem",
-                                    right: "2rem",
-                                    width: "300px",
-                                    padding: "1.5rem",
-                                    background: "rgba(10, 10, 10, 0.85)",
-                                    backdropFilter: "blur(12px)",
-                                    border: "1px solid rgba(225, 6, 0, 0.3)",
-                                    borderLeft: "3px solid var(--color-red)",
-                                    borderRadius: "var(--radius-md)",
-                                    boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
-                                    pointerEvents: "none",
-                                    zIndex: 10
-                                }}
-                            >
-                                <div className="hud-label" style={{ color: "var(--color-red)", marginBottom: "0.5rem" }}>
-                                    Component Inspected
-                                </div>
-                                <h3 style={{ fontFamily: "var(--font-heading)", fontSize: "1.5rem", marginBottom: "0.5rem" }}>
-                                    {hoveredComponent.name}
-                                </h3>
-                                <p style={{ fontSize: "0.85rem", color: "var(--color-text-muted)", lineHeight: 1.5 }}>
-                                    {hoveredComponent.desc}
-                                </p>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+          <div className="ce-model-badge">
+            <div>MODEL</div>
+            <div className="ce-model-badge-val">RB19 — 2023 SPEC</div>
+          </div>
 
-                    {/* HUD Overlays */}
-                    <div style={{ position: "absolute", top: "1rem", left: "1rem" }}>
-                        <span className="hud-tag">Live 3D</span>
-                    </div>
-                    <div style={{ position: "absolute", top: "1rem", right: "1rem", textAlign: "right" }}>
-                        <div className="hud-label">Controls</div>
-                        <div style={{ fontFamily: "var(--font-heading)", fontSize: "0.75rem", color: "rgba(240,240,240,0.5)", lineHeight: 1.6 }}>
-                            Drag · Rotate<br />
-                            Scroll · Zoom<br />
-                            Hover · Inspect
-                        </div>
-                    </div>
-                    <div style={{ position: "absolute", bottom: "1rem", left: "1rem" }}>
-                        <div className="hud-label" style={{ marginBottom: "0.25rem" }}>Model</div>
-                        <div style={{ fontFamily: "var(--font-display)", fontSize: "0.7rem", letterSpacing: "0.1em", color: "rgba(240,240,240,0.6)" }}>
-                            F1 CAR — 2026 SPEC
-                        </div>
-                    </div>
-                </motion.div>
+          <button
+            className="ce-reset-btn"
+            onClick={() => {
+              setSelectedIndex(-1);
+              setExplodeFactor(0);
+              setViewMode("assembled");
+            }}
+          >
+            RESET VIEW
+          </button>
 
-                {/* Component cards */}
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.3 }}
-                    style={{
-                        display: "grid",
-                        gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
-                        gap: "1rem",
-                        marginTop: "1.5rem",
-                    }}
-                >
-                    {["Front Wing", "Nose Box", "Suspension", "Sidepods", "Air Box", "Halo", "Cockpit", "Diffuser", "Rear Wing"].map((part) => (
-                        <button
-                            key={part}
-                            className="card-dark"
-                            style={{
-                                padding: "1rem",
-                                cursor: "pointer",
-                                textAlign: "left",
-                                background: "none",
-                                color: "inherit",
-                                fontFamily: "inherit",
-                            }}
-                        >
-                            <div className="hud-label" style={{ marginBottom: "0.25rem" }}>Component</div>
-                            <div style={{ fontFamily: "var(--font-heading)", fontSize: "0.9rem", fontWeight: 500 }}>{part}</div>
-                        </button>
-                    ))}
-                </motion.div>
-            </div>
-        </section>
-    );
+          <CarExplorerHotkeys />
+        </div>
+
+        {/* Right Panel — Spec Card */}
+        <CarExplorerSpecCard selectedIndex={selectedIndex} />
+      </div>
+    </section>
+  );
 }

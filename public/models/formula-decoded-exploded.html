@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Formula Decoded — CAR EXPLORER</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,700;1,800&family=Barlow:wght@300;400;500;600&family=Share+Tech+Mono&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --red: #E8001D;
+    --red-dim: #8B0011;
+    --red-glow: rgba(232,0,29,0.35);
+    --bg: #080808;
+    --bg2: #0f0f0f;
+    --bg3: #161616;
+    --border: #1e1e1e;
+    --text: #f0f0f0;
+    --text-dim: #888;
+    --text-muted: #444;
+    --mono: 'Share Tech Mono', monospace;
+    --display: 'Barlow Condensed', sans-serif;
+    --body: 'Barlow', sans-serif;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body);
+    overflow: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    height: 52px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px;
+    background: rgba(8,8,8,0.95);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+  }
+  .nav-logo {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--display); font-weight: 800; font-size: 15px;
+    letter-spacing: 0.05em; text-transform: uppercase;
+  }
+  .nav-logo .diamond {
+    width: 14px; height: 14px; background: var(--red);
+    transform: rotate(45deg); flex-shrink: 0;
+  }
+  .nav-logo span { color: var(--red-dim); font-weight: 400; }
+  .nav-center {
+    display: flex; gap: 32px;
+    font-family: var(--display); font-size: 11px; font-weight: 600;
+    letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-dim);
+  }
+  .nav-center a { cursor: pointer; transition: color 0.2s; text-decoration: none; color: inherit; }
+  .nav-center a:hover { color: var(--text); }
+  .nav-badge {
+    font-family: var(--mono); font-size: 11px; color: var(--red);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .live-dot {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--red);
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* ── MAIN LAYOUT ── */
+  .app {
+    display: flex; height: 100vh; padding-top: 52px;
+  }
+
+  /* ── LEFT PANEL ── */
+  .left-panel {
+    width: 300px; flex-shrink: 0;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .panel-header {
+    padding: 20px 20px 0;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 16px;
+  }
+  .panel-eyebrow {
+    font-family: var(--mono); font-size: 9px; color: var(--red);
+    letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 6px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .panel-eyebrow::before {
+    content: ''; width: 20px; height: 1px; background: var(--red);
+  }
+  .panel-title {
+    font-family: var(--display); font-size: 22px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.02em;
+    line-height: 1;
+  }
+  .panel-subtitle {
+    margin-top: 6px; font-size: 11px; color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  /* Mode toggle */
+  .mode-toggle {
+    display: flex; gap: 1px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .mode-btn {
+    flex: 1; height: 30px;
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em;
+    text-transform: uppercase; border: 1px solid var(--border);
+    background: transparent; color: var(--text-dim); cursor: pointer;
+    transition: all 0.2s;
+  }
+  .mode-btn:first-child { border-radius: 3px 0 0 3px; }
+  .mode-btn:last-child { border-radius: 0 3px 3px 0; }
+  .mode-btn.active {
+    background: var(--red); border-color: var(--red);
+    color: #fff; font-weight: 700;
+  }
+  .mode-btn:hover:not(.active) { border-color: var(--text-muted); color: var(--text); }
+
+  /* Component list */
+  .component-list {
+    flex: 1; overflow-y: auto; padding: 8px 0;
+  }
+  .component-list::-webkit-scrollbar { width: 3px; }
+  .component-list::-webkit-scrollbar-track { background: transparent; }
+  .component-list::-webkit-scrollbar-thumb { background: var(--border); }
+
+  .comp-item {
+    padding: 12px 20px;
+    border-left: 2px solid transparent;
+    cursor: pointer; transition: all 0.15s;
+    display: flex; align-items: flex-start; gap: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+  .comp-item:hover { background: rgba(255,255,255,0.03); }
+  .comp-item.active {
+    background: rgba(232,0,29,0.08);
+    border-left-color: var(--red);
+  }
+  .comp-number {
+    font-family: var(--mono); font-size: 10px; color: var(--text-muted);
+    min-width: 22px; margin-top: 2px;
+  }
+  .comp-item.active .comp-number { color: var(--red); }
+  .comp-info { flex: 1; }
+  .comp-name {
+    font-family: var(--display); font-size: 13px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--text-dim); transition: color 0.15s;
+  }
+  .comp-item.active .comp-name, .comp-item:hover .comp-name { color: var(--text); }
+  .comp-desc { font-size: 10px; color: var(--text-muted); margin-top: 2px; line-height: 1.4; }
+  .comp-tag {
+    font-family: var(--mono); font-size: 8px; padding: 2px 6px;
+    border: 1px solid var(--border); color: var(--text-muted);
+    border-radius: 2px; margin-top: 4px; display: inline-block;
+  }
+  .comp-item.active .comp-tag { border-color: var(--red-dim); color: var(--red); }
+
+  /* Explode slider */
+  .explode-control {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+  }
+  .explode-label {
+    font-family: var(--mono); font-size: 9px; color: var(--text-dim);
+    letter-spacing: 0.1em; text-transform: uppercase;
+    display: flex; justify-content: space-between; margin-bottom: 10px;
+  }
+  .explode-label span { color: var(--red); }
+  input[type=range] {
+    -webkit-appearance: none; width: 100%; height: 2px;
+    background: var(--border); border-radius: 2px; outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 14px; height: 14px;
+    background: var(--red); border-radius: 50%;
+    box-shadow: 0 0 8px var(--red-glow);
+  }
+
+  /* ── CANVAS AREA ── */
+  .canvas-wrap {
+    flex: 1; position: relative; overflow: hidden;
+  }
+  #canvas { width: 100%; height: 100%; display: block; }
+
+  /* Controls overlay */
+  .controls-overlay {
+    position: absolute; top: 16px; right: 16px;
+    font-family: var(--mono); font-size: 9px; color: var(--text-muted);
+    text-align: right; line-height: 2; letter-spacing: 0.08em;
+    pointer-events: none;
+  }
+  .controls-overlay div::before {
+    content: ''; display: inline-block; width: 20px;
+    height: 1px; background: var(--border); vertical-align: middle; margin-right: 8px;
+  }
+
+  /* Model badge */
+  .model-badge {
+    position: absolute; bottom: 16px; left: 16px;
+    font-family: var(--mono); font-size: 9px; color: var(--text-muted);
+    letter-spacing: 0.1em; text-transform: uppercase;
+    display: flex; flex-direction: column; gap: 3px;
+  }
+  .model-badge .badge-label { color: var(--text-muted); }
+  .model-badge .badge-val { color: var(--text-dim); font-size: 11px; }
+
+  /* Loading screen */
+  #loading {
+    position: absolute; inset: 0; background: var(--bg);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    z-index: 50; gap: 24px;
+  }
+  .loading-title {
+    font-family: var(--display); font-size: 48px; font-weight: 900;
+    text-transform: uppercase; letter-spacing: -0.01em;
+  }
+  .loading-title span { color: var(--red); }
+  .loading-bar-wrap {
+    width: 280px; height: 2px; background: var(--border); border-radius: 2px;
+  }
+  .loading-bar {
+    height: 100%; width: 0%; background: var(--red); border-radius: 2px;
+    transition: width 0.1s; box-shadow: 0 0 12px var(--red-glow);
+  }
+  .loading-text {
+    font-family: var(--mono); font-size: 10px; color: var(--text-muted);
+    letter-spacing: 0.15em; text-transform: uppercase;
+  }
+
+  /* ── RIGHT PANEL (spec card) ── */
+  .right-panel {
+    width: 280px; flex-shrink: 0;
+    background: var(--bg2);
+    border-left: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .spec-header {
+    padding: 20px;
+    border-bottom: 1px solid var(--border);
+    min-height: 110px;
+  }
+  .spec-eyebrow {
+    font-family: var(--mono); font-size: 9px; color: var(--red);
+    letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 8px;
+  }
+  .spec-title {
+    font-family: var(--display); font-size: 26px; font-weight: 900;
+    text-transform: uppercase; letter-spacing: 0.01em; line-height: 1;
+  }
+  .spec-subtitle {
+    font-size: 11px; color: var(--text-dim); margin-top: 6px; line-height: 1.5;
+  }
+  .spec-body { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 16px; }
+  .spec-body::-webkit-scrollbar { width: 3px; }
+  .spec-body::-webkit-scrollbar-thumb { background: var(--border); }
+
+  .spec-section {}
+  .spec-section-label {
+    font-family: var(--mono); font-size: 8px; color: var(--text-muted);
+    letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 10px;
+    padding-bottom: 6px; border-bottom: 1px solid var(--border);
+  }
+  .spec-row {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 8px; gap: 8px;
+  }
+  .spec-key {
+    font-size: 10px; color: var(--text-muted); line-height: 1.4;
+    flex-shrink: 0; max-width: 110px;
+  }
+  .spec-val {
+    font-family: var(--mono); font-size: 10px; color: var(--text);
+    text-align: right; line-height: 1.4;
+  }
+  .spec-val.highlight { color: var(--red); font-weight: 700; font-size: 11px; }
+
+  .spec-bar-row { margin-bottom: 10px; }
+  .spec-bar-label {
+    display: flex; justify-content: space-between;
+    font-family: var(--mono); font-size: 9px; color: var(--text-muted); margin-bottom: 4px;
+  }
+  .spec-bar { height: 2px; background: var(--border); border-radius: 2px; }
+  .spec-bar-fill { height: 100%; background: var(--red); border-radius: 2px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
+
+  .spec-tag-row { display: flex; flex-wrap: wrap; gap: 4px; }
+  .spec-tag {
+    font-family: var(--mono); font-size: 8px; padding: 3px 7px;
+    border: 1px solid var(--border); color: var(--text-muted);
+    border-radius: 2px;
+  }
+  .spec-tag.red { border-color: var(--red-dim); color: var(--red); }
+
+  .spec-note {
+    font-size: 10px; color: var(--text-muted); line-height: 1.6;
+    padding: 10px; background: rgba(232,0,29,0.05);
+    border-left: 2px solid var(--red-dim); border-radius: 0 3px 3px 0;
+  }
+
+  .empty-state {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 12px;
+    padding: 32px;
+  }
+  .empty-icon {
+    width: 40px; height: 40px; border: 1px solid var(--border);
+    transform: rotate(45deg); opacity: 0.3;
+  }
+  .empty-text {
+    font-family: var(--mono); font-size: 10px; color: var(--text-muted);
+    text-align: center; letter-spacing: 0.1em; text-transform: uppercase;
+    line-height: 1.8;
+  }
+
+  /* Highlight label in 3D space */
+  .part-label {
+    position: absolute; pointer-events: none;
+    font-family: var(--mono); font-size: 9px; color: var(--red);
+    letter-spacing: 0.12em; text-transform: uppercase;
+    display: flex; align-items: center; gap: 6px;
+    transform: translate(-50%, -50%);
+    transition: opacity 0.3s;
+    white-space: nowrap;
+  }
+  .part-label-dot { width: 5px; height: 5px; background: var(--red); border-radius: 50%; flex-shrink: 0; }
+  .part-label-line { width: 24px; height: 1px; background: var(--red); opacity: 0.6; }
+
+  .reset-btn {
+    position: absolute; bottom: 16px; right: 16px;
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em;
+    text-transform: uppercase; border: 1px solid var(--border);
+    background: rgba(8,8,8,0.9); color: var(--text-dim); cursor: pointer;
+    padding: 7px 14px; border-radius: 3px; transition: all 0.2s;
+  }
+  .reset-btn:hover { border-color: var(--red); color: var(--red); }
+
+  /* Hotkeys hint */
+  .hotkeys {
+    position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
+    font-family: var(--mono); font-size: 9px; color: var(--text-muted);
+    display: flex; gap: 16px; letter-spacing: 0.08em;
+    pointer-events: none;
+  }
+  .hotkey { display: flex; align-items: center; gap: 5px; }
+  .key {
+    padding: 2px 5px; border: 1px solid var(--border);
+    border-radius: 2px; font-size: 8px; color: var(--text-muted);
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">
+    <div class="diamond"></div>
+    FORMULA <span>DECODED</span>
+  </div>
+  <div class="nav-center">
+    <a>THE MACHINE</a>
+    <a>THE GRID</a>
+    <a>RACE CONTROL</a>
+  </div>
+  <div class="nav-badge">
+    <div class="live-dot"></div>
+    2026 SEASON
+  </div>
+</nav>
+
+<div class="app">
+
+  <!-- LEFT: component selector -->
+  <div class="left-panel">
+    <div class="panel-header">
+      <div class="panel-eyebrow">Interactive 3D</div>
+      <div class="panel-title">CAR EXPLORER</div>
+      <div class="panel-subtitle">Select a component to isolate and inspect. Drag to rotate. Scroll to zoom.</div>
+    </div>
+
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="btn-assembled" onclick="setMode('assembled')">ASSEMBLED</button>
+      <button class="mode-btn" id="btn-exploded" onclick="setMode('exploded')">EXPLODED</button>
+      <button class="mode-btn" id="btn-xray" onclick="setMode('xray')">X-RAY</button>
+    </div>
+
+    <div class="component-list" id="comp-list"></div>
+
+    <div class="explode-control">
+      <div class="explode-label">
+        EXPLODE FACTOR <span id="explode-val">0%</span>
+      </div>
+      <input type="range" id="explode-slider" min="0" max="100" value="0"
+             oninput="setExplodeFactor(this.value)">
+    </div>
+  </div>
+
+  <!-- CENTER: canvas -->
+  <div class="canvas-wrap">
+    <div id="loading">
+      <div class="loading-title">CAR <span>EXPLORER</span></div>
+      <div class="loading-bar-wrap"><div class="loading-bar" id="load-bar"></div></div>
+      <div class="loading-text" id="load-text">INITIALISING THREE.JS ENGINE</div>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <div class="controls-overlay">
+      <div>DRAG · ROTATE</div>
+      <div>SCROLL · ZOOM</div>
+      <div>RIGHT-DRAG · PAN</div>
+      <div>CLICK · INSPECT</div>
+    </div>
+
+    <div class="model-badge">
+      <div class="badge-label">MODEL</div>
+      <div class="badge-val">RB19 — 2023 SPEC</div>
+    </div>
+
+    <button class="reset-btn" onclick="resetCamera()">RESET VIEW</button>
+
+    <div class="hotkeys">
+      <div class="hotkey"><span class="key">E</span> EXPLODE</div>
+      <div class="hotkey"><span class="key">R</span> RESET</div>
+      <div class="hotkey"><span class="key">X</span> X-RAY</div>
+      <div class="hotkey"><span class="key">1-7</span> SELECT PART</div>
+    </div>
+  </div>
+
+  <!-- RIGHT: spec card -->
+  <div class="right-panel">
+    <div class="spec-header" id="spec-header">
+      <div class="spec-eyebrow">COMPONENT DATA</div>
+      <div class="spec-title" id="spec-title">SELECT PART</div>
+      <div class="spec-subtitle" id="spec-sub">Click any component on the model or from the list to view engineering specifications.</div>
+    </div>
+    <div class="spec-body" id="spec-body">
+      <div class="empty-state">
+        <div class="empty-icon"></div>
+        <div class="empty-text">NO COMPONENT<br>SELECTED<br><br>CLICK A PART<br>TO BEGIN</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- THREE.JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ── COMPONENT DATA ─────────────────────────────────────────────────────────
+const COMPONENTS = [
+  {
+    id: 0, meshIdx: 0,
+    name: 'FRONT WING', short: 'Front Wing',
+    tag: 'AERODYNAMICS',
+    desc: 'Multi-element composite wing with active DRS flap',
+    explodeDir: [0, 0.3, 2.2],
+    specs: {
+      overview: 'The front wing generates roughly 25-30% of total downforce. Its complex multi-element design manages airflow for the entire car, directing clean air to the sidepod inlets and conditioning vortices to reduce drag at the rear.',
+      technical: [
+        { k: 'Material', v: 'Carbon fibre composite' },
+        { k: 'Weight', v: '≈ 4.2 kg' },
+        { k: 'Elements', v: '5-element cascade' },
+        { k: 'Downforce share', v: '~28% total' },
+        { k: 'DRS angle', v: '15° → 0° (stall)' },
+        { k: 'Max load', v: '~2,500 N' },
+      ],
+      bars: [
+        { label: 'Downforce contribution', val: 28 },
+        { label: 'Drag sensitivity', val: 72 },
+        { label: 'Structural stiffness', val: 90 },
+      ],
+      tags: ['DRS CAPABLE', 'ACTIVE AERO', 'CARBON FIBRE', 'FIA ART.3.9'],
+      note: '2026 REG: Active aerodynamic systems replace traditional DRS. Wings auto-adjust between corner (high-DF) and straight (low-drag) modes based on speed threshold.',
+    }
+  },
+  {
+    id: 1, meshIdx: 1,
+    name: 'MONOCOQUE', short: 'Chassis',
+    tag: 'CHASSIS',
+    desc: 'Carbon fibre safety cell — the structural core of the car',
+    explodeDir: [0, 0, 0],
+    specs: {
+      overview: 'The monocoque is the central survival cell housing the driver. Constructed from pre-preg carbon fibre autoclave-cured at 120°C, it must withstand 25G frontal impacts, side-intrusion tests, and roof crush loads per FIA Article 15.',
+      technical: [
+        { k: 'Material', v: 'Pre-preg CF + Kevlar' },
+        { k: 'Wall thickness', v: '3.5 – 8 mm' },
+        { k: 'Total weight', v: '≈ 38 kg' },
+        { k: 'Torsional stiffness', v: '>12,000 Nm/°' },
+        { k: 'Min driver weight', v: '80 kg (driver+seat)' },
+        { k: 'Halo attachment', v: '6 × M12 titanium bolts' },
+      ],
+      bars: [
+        { label: 'Structural rigidity', val: 98 },
+        { label: 'Crash energy absorption', val: 94 },
+        { label: 'Weight optimisation', val: 88 },
+      ],
+      tags: ['FIA ART.15', 'SURVIVAL CELL', 'HALO MOUNT', 'HOMOLOGATED'],
+      note: 'Monocoque must be recertified by FIA after any modification. Red Bull use a "coke bottle" narrowing behind the cockpit to improve rear aerodynamic efficiency.',
+    }
+  },
+  {
+    id: 2, meshIdx: 2,
+    name: 'REAR WING', short: 'Rear Wing',
+    tag: 'AERODYNAMICS',
+    desc: 'Beam wing + main plane generating rear downforce and DRS',
+    explodeDir: [0, 0.4, -2.0],
+    specs: {
+      overview: 'The rear wing is the single largest downforce-generating device on the car, producing up to 800N of load at race speeds. DRS opens the top flap reducing drag by ~10 km/h on straights.',
+      technical: [
+        { k: 'Main plane AoA', v: '10° – 30°' },
+        { k: 'DRS chord length', v: '≈ 400 mm' },
+        { k: 'Drag reduction (DRS)', v: '~20–25% less drag' },
+        { k: 'Top speed delta', v: '+10–12 km/h' },
+        { k: 'Material', v: 'Carbon fibre, titanium nuts' },
+        { k: 'Beam wing gap', v: '10 mm minimum' },
+      ],
+      bars: [
+        { label: 'Downforce contribution', val: 35 },
+        { label: 'Drag at 300 km/h', val: 65 },
+        { label: 'DRS efficiency gain', val: 80 },
+      ],
+      tags: ['DRS ZONE', 'FIA ART.3.10', 'ACTIVE ELEMENT', 'BEAM WING'],
+      note: '2026 regulation change: DRS abolished. Replaced by Moveable Aero System (MAS) which uses wing flex controlled by hydraulic actuators — teams can no longer tune gap settings freely.',
+    }
+  },
+  {
+    id: 3, meshIdx: 3,
+    name: 'SIDEPODS & COOLING', short: 'Sidepods',
+    tag: 'THERMAL MGMT',
+    desc: 'Undercut sidepods housing radiators, intercooler, oil coolers',
+    explodeDir: [1.6, 0, 0],
+    specs: {
+      overview: 'Sidepods house the radiator stack, intercooler, hydraulic fluid cooler, and gearbox oil cooler. Airflow management through the inlet is the primary differentiator between teams — RB19\'s extreme undercut was the most aggressive in 2023.',
+      technical: [
+        { k: 'Inlet area', v: '≈ 0.12 m²' },
+        { k: 'Radiator count', v: '2× water + 1× oil' },
+        { k: 'Coolant temp range', v: '80 – 110 °C' },
+        { k: 'Undercut depth', v: 'Max per ART.3.5' },
+        { k: 'Exit chimney area', v: 'Free (engine cover)' },
+        { k: 'Floor connection', v: 'Diffuser outwash zone' },
+      ],
+      bars: [
+        { label: 'Cooling efficiency', val: 87 },
+        { label: 'Aero impact (negative)', val: 55 },
+        { label: 'Packaging complexity', val: 92 },
+      ],
+      tags: ['THERMAL', 'RADIATOR STACK', 'UNDERCUT', 'OUTWASH VORTEX'],
+      note: 'RB19 pioneered extreme sidepod undercuts with near-zero side profile. This reduces drag but demands aggressive internal packaging — all cooling stacked almost vertically.',
+    }
+  },
+  {
+    id: 4, meshIdx: 4,
+    name: 'FLOOR & DIFFUSER', short: 'Floor',
+    tag: 'GROUND EFFECT',
+    desc: 'Primary downforce source via ground-effect venturi tunnels',
+    explodeDir: [0, -0.9, 0],
+    specs: {
+      overview: 'Since 2022, F1 returned to ground effect. The floor\'s venturi channels accelerate airflow beneath the car creating a low-pressure zone that "sucks" the car down. The rear diffuser expands this flow, recovering pressure and generating 40-45% of total downforce.',
+      technical: [
+        { k: 'Ride height (front)', v: '8 – 15 mm' },
+        { k: 'Ride height (rear)', v: '60 – 90 mm' },
+        { k: 'Venturi channels', v: '2 tunnels per side' },
+        { k: 'Diffuser expansion', v: '13° max angle' },
+        { k: 'Downforce share', v: '~40% total' },
+        { k: 'Porpoising threshold', v: '< 8 mm → stall' },
+      ],
+      bars: [
+        { label: 'Downforce contribution', val: 42 },
+        { label: 'Ride height sensitivity', val: 95 },
+        { label: 'Porpoising risk', val: 68 },
+      ],
+      tags: ['GROUND EFFECT', 'VENTURI', 'DIFFUSER', 'FIA ART.3.15'],
+      note: '2022 regs introduced floor edges and a sealed underfloor. Teams discovered "porpoising" — aerodynamic stall at low ride heights causing violent oscillations — a unique challenge for 2022 season.',
+    }
+  },
+  {
+    id: 5, meshIdx: 5,
+    name: 'POWER UNIT', short: 'Power Unit',
+    tag: 'POWERTRAIN',
+    desc: '1.6L turbo-hybrid V6 — 1000+ HP combined output',
+    explodeDir: [0, 0.5, -0.4],
+    specs: {
+      overview: 'The F1 power unit is the most thermally efficient internal combustion engine ever built, achieving ~52% thermal efficiency vs ~40% for road cars. It combines a 1.6L V6 ICE with two motor-generator units (MGU-K and MGU-H) and an energy store.',
+      technical: [
+        { k: 'ICE displacement', v: '1,600 cc V6' },
+        { k: 'Rev limit', v: '15,000 RPM (FIA)' },
+        { k: 'Thermal efficiency', v: '~52%' },
+        { k: 'ICE output', v: '~565 kW (~760 HP)' },
+        { k: 'MGU-K peak output', v: '120 kW (FIA limit)' },
+        { k: 'Total combined', v: '>1000 HP' },
+        { k: 'Fuel flow limit', v: '100 kg/hr at >10,500 RPM' },
+        { k: 'Fuel per race', v: '110 kg (2026: 70 kg)' },
+      ],
+      bars: [
+        { label: 'Thermal efficiency', val: 52 },
+        { label: 'Power density', val: 97 },
+        { label: 'Reliability (2023)', val: 88 },
+      ],
+      tags: ['HONDA RBPT', 'ICE + ERS', 'MGU-K', 'TURBO'],
+      note: '2026 rules increase electrical power to 350 kW MGU-K (vs 120 kW now) with a 50/50 ICE/electric power split — fundamentally changing engine-braking, energy deployment strategy, and fuel composition.',
+    }
+  },
+  {
+    id: 6, meshIdx: 6,
+    name: 'SUSPENSION & WHEELS', short: 'Suspension',
+    tag: 'CHASSIS',
+    desc: 'Double-wishbone pull/push rod with inboard dampers',
+    explodeDir: [1.4, -0.3, 0.5],
+    specs: {
+      overview: 'F1 uses double-wishbone suspension with inboard-mounted springs and dampers connected via pull-rod (rear) or push-rod (front) geometry. The suspension must simultaneously manage aerodynamic ride height and mechanical grip — often conflicting targets.',
+      technical: [
+        { k: 'Front geometry', v: 'Pushrod double wishbone' },
+        { k: 'Rear geometry', v: 'Pullrod double wishbone' },
+        { k: 'Spring rate (front)', v: '100 – 300 N/mm' },
+        { k: 'Spring rate (rear)', v: '80 – 220 N/mm' },
+        { k: 'Camber range', v: '-3.5° to 0°' },
+        { k: 'Toe range', v: '-0.2° to +0.2°' },
+        { k: 'Wheel diameter', v: '18-inch (since 2022)' },
+        { k: 'Tyre supplier', v: 'Pirelli (sole supplier)' },
+      ],
+      bars: [
+        { label: 'Mechanical grip', val: 78 },
+        { label: 'Aero-mechanical conflict', val: 82 },
+        { label: 'Setup complexity', val: 95 },
+      ],
+      tags: ['PULLROD REAR', 'PUSHROD FRONT', '18-INCH RIM', 'PIRELLI P-ZERO'],
+      note: 'Active suspension has been banned since 1994. 2026 proposals discussed reintroduction but FIA confirmed continued ban. Teams use heave springs and inerters to control aerodynamic ride height indirectly.',
+    }
+  },
+];
+
+// ── THREE.JS SCENE ──────────────────────────────────────────────────────────
+let scene, camera, renderer, controls;
+let modelGroup, meshes = [];
+let selectedIdx = -1;
+let explodeFactor = 0;
+let currentMode = 'assembled';
+let xrayMats = [], origMats = [];
+let raycaster, mouse;
+let animationId;
+let basePositions = [];
+
+function setProgress(pct, text) {
+  document.getElementById('load-bar').style.width = pct + '%';
+  if (text) document.getElementById('load-text').textContent = text;
+}
+
+function initThree() {
+  const canvas = document.getElementById('canvas');
+  const wrap = canvas.parentElement;
+
+  // Renderer
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.1;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  resize();
+
+  // Scene
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x080808);
+  scene.fog = new THREE.FogExp2(0x080808, 0.18);
+
+  // Camera
+  camera = new THREE.PerspectiveCamera(45, wrap.clientWidth / wrap.clientHeight, 0.01, 100);
+  camera.position.set(3.5, 1.5, 3.5);
+
+  // Lights
+  const ambient = new THREE.AmbientLight(0xffffff, 0.4);
+  scene.add(ambient);
+
+  const key = new THREE.DirectionalLight(0xffffff, 1.8);
+  key.position.set(3, 4, 2);
+  key.castShadow = true;
+  key.shadow.mapSize.set(2048, 2048);
+  scene.add(key);
+
+  const fill = new THREE.DirectionalLight(0xffa0a0, 0.6);
+  fill.position.set(-3, 2, -2);
+  scene.add(fill);
+
+  const rim = new THREE.DirectionalLight(0xff1a1a, 0.4);
+  rim.position.set(0, -2, -4);
+  scene.add(rim);
+
+  const under = new THREE.DirectionalLight(0xff0000, 0.2);
+  under.position.set(0, -3, 0);
+  scene.add(under);
+
+  // Ground grid
+  const gridHelper = new THREE.GridHelper(10, 30, 0x2a0000, 0x150000);
+  gridHelper.position.y = -0.55;
+  scene.add(gridHelper);
+
+  // Raycaster
+  raycaster = new THREE.Raycaster();
+  mouse = new THREE.Vector2();
+
+  // OrbitControls (manual implementation)
+  setupOrbitControls();
+
+  window.addEventListener('resize', resize);
+  canvas.addEventListener('click', onCanvasClick);
+  document.addEventListener('keydown', onKeyDown);
+
+  setProgress(20, 'LOADING GLB MODEL');
+
+  loadGLB();
+}
+
+// ── Manual OrbitControls ──
+let isDragging = false, isRightDrag = false;
+let prevMouse = { x: 0, y: 0 };
+let spherical = { theta: Math.PI / 4, phi: Math.PI / 3, radius: 5 };
+let target = new THREE.Vector3(0, 0, 0);
+
+function setupOrbitControls() {
+  const canvas = document.getElementById('canvas');
+  canvas.addEventListener('mousedown', e => {
+    isDragging = true;
+    isRightDrag = e.button === 2;
+    prevMouse = { x: e.clientX, y: e.clientY };
+  });
+  canvas.addEventListener('contextmenu', e => e.preventDefault());
+  window.addEventListener('mouseup', () => isDragging = false);
+  window.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    const dx = (e.clientX - prevMouse.x) * 0.005;
+    const dy = (e.clientY - prevMouse.y) * 0.005;
+    if (isRightDrag) {
+      const right = new THREE.Vector3();
+      const up = new THREE.Vector3();
+      camera.getWorldDirection(right);
+      right.cross(camera.up).normalize();
+      up.copy(camera.up);
+      target.addScaledVector(right, -dx * spherical.radius * 0.5);
+      target.addScaledVector(up, dy * spherical.radius * 0.5);
+    } else {
+      spherical.theta -= dx;
+      spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi + dy));
+    }
+    prevMouse = { x: e.clientX, y: e.clientY };
+    updateCamera();
+  });
+  canvas.addEventListener('wheel', e => {
+    e.preventDefault();
+    spherical.radius = Math.max(1.5, Math.min(12, spherical.radius + e.deltaY * 0.005));
+    updateCamera();
+  }, { passive: false });
+
+  // Touch
+  let lastTouch = null;
+  canvas.addEventListener('touchstart', e => { lastTouch = e.touches[0]; isDragging = true; });
+  canvas.addEventListener('touchend', () => isDragging = false);
+  canvas.addEventListener('touchmove', e => {
+    if (!isDragging || !lastTouch) return;
+    const t = e.touches[0];
+    const dx = (t.clientX - lastTouch.clientX) * 0.008;
+    const dy = (t.clientY - lastTouch.clientY) * 0.008;
+    spherical.theta -= dx;
+    spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi + dy));
+    lastTouch = t;
+    updateCamera();
+  });
+}
+
+function updateCamera() {
+  const x = target.x + spherical.radius * Math.sin(spherical.phi) * Math.sin(spherical.theta);
+  const y = target.y + spherical.radius * Math.cos(spherical.phi);
+  const z = target.z + spherical.radius * Math.sin(spherical.phi) * Math.cos(spherical.theta);
+  camera.position.set(x, y, z);
+  camera.lookAt(target);
+}
+
+function resetCamera() {
+  spherical = { theta: Math.PI / 4, phi: Math.PI / 3.5, radius: 5 };
+  target.set(0, 0, 0);
+  updateCamera();
+}
+
+// ── Load GLB ──
+function loadGLB() {
+  // Dynamically load GLTFLoader
+  const script = document.createElement('script');
+  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/loaders/GLTFLoader.js';
+  script.onload = () => {
+    setProgress(30, 'PARSING MESH DATA');
+    const loader = new THREE.GLTFLoader();
+
+    // Try to load from same directory (outputs)
+    loader.load(
+      'f1_car_rb19_2023.glb',
+      (gltf) => onGLBLoaded(gltf),
+      (progress) => {
+        if (progress.total > 0) {
+          const pct = 30 + (progress.loaded / progress.total) * 50;
+          setProgress(pct, 'STREAMING GEOMETRY DATA');
+        }
+      },
+      (err) => {
+        console.error('GLB load error:', err);
+        setProgress(85, 'MODEL UNAVAILABLE — BUILDING PROCEDURAL');
+        buildProceduralCar();
+      }
+    );
+  };
+  document.head.appendChild(script);
+}
+
+function onGLBLoaded(gltf) {
+  setProgress(82, 'BUILDING SCENE GRAPH');
+
+  modelGroup = new THREE.Group();
+  scene.add(modelGroup);
+
+  // Collect all mesh objects
+  const allMeshes = [];
+  gltf.scene.traverse(obj => {
+    if (obj.isMesh) allMeshes.push(obj);
+  });
+
+  // Center the model
+  const box = new THREE.Box3().setFromObject(gltf.scene);
+  const center = box.getCenter(new THREE.Vector3());
+  const size = box.getSize(new THREE.Vector3());
+  const maxDim = Math.max(size.x, size.y, size.z);
+  const scale = 3.0 / maxDim;
+
+  gltf.scene.position.sub(center.multiplyScalar(scale));
+  gltf.scene.scale.setScalar(scale);
+
+  // Rotate to face camera nicely (F1 cars are usually Z-forward in GLB)
+  gltf.scene.rotation.y = Math.PI;
+
+  modelGroup.add(gltf.scene);
+
+  // Map component definitions to actual meshes
+  allMeshes.forEach((mesh, i) => {
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+
+    // Store original material
+    origMats.push(mesh.material ? mesh.material.clone() : null);
+
+    // Make material nice
+    if (mesh.material) {
+      mesh.material = mesh.material.clone();
+      mesh.material.metalness = 0.6;
+      mesh.material.roughness = 0.35;
+      mesh.material.envMapIntensity = 1.2;
+    }
+
+    // Map to component definitions (7 meshes → 7 components)
+    const compDef = COMPONENTS[i % COMPONENTS.length];
+    mesh.userData.compIdx = i < COMPONENTS.length ? i : -1;
+
+    // Record base world position
+    mesh.updateWorldMatrix(true, false);
+    basePositions.push(mesh.position.clone());
+    meshes.push(mesh);
+  });
+
+  // If fewer real meshes than components, fill remaining
+  while (meshes.length < COMPONENTS.length) {
+    meshes.push(null);
+    basePositions.push(new THREE.Vector3());
+  }
+
+  setProgress(95, 'INITIALISING ENVIRONMENT PROBE');
+  finishSetup();
+}
+
+// ── Procedural fallback car ──
+function buildProceduralCar() {
+  modelGroup = new THREE.Group();
+  scene.add(modelGroup);
+
+  const matBase = new THREE.MeshStandardMaterial({ color: 0x1a1a2e, metalness: 0.8, roughness: 0.3 });
+  const matRed = new THREE.MeshStandardMaterial({ color: 0xe8001d, metalness: 0.6, roughness: 0.4 });
+  const matYellow = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.7, roughness: 0.3 });
+  const matCarbon = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.5, roughness: 0.6 });
+  const matTyre = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, metalness: 0.1, roughness: 0.9 });
+
+  const parts = [];
+
+  // 0: Front wing
+  const fwGroup = new THREE.Group();
+  const mainPlane = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.03, 0.28), matRed.clone());
+  const el1 = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.02, 0.18), matBase.clone());
+  el1.position.set(0, 0.05, -0.07);
+  const el2 = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.02, 0.14), matBase.clone());
+  el2.position.set(0, 0.09, -0.12);
+  const nose = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.4, 8), matBase.clone());
+  nose.rotation.x = -Math.PI/2; nose.position.set(0, 0.08, 0.25);
+  const ep1 = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.15, 0.25), matBase.clone());
+  ep1.position.set(-0.68, 0.05, 0);
+  const ep2 = ep1.clone(); ep2.position.x = 0.68;
+  fwGroup.add(mainPlane, el1, el2, nose, ep1, ep2);
+  fwGroup.position.set(0, -0.18, 1.35);
+  parts.push(fwGroup);
+
+  // 1: Monocoque / chassis
+  const chassis = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.32, 1.8), matBase.clone());
+  const cockpit = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.3, 0.55), matCarbon.clone());
+  cockpit.position.set(0, 0.28, 0.28);
+  const halo = new THREE.Mesh(new THREE.TorusGeometry(0.22, 0.02, 6, 20, Math.PI), matCarbon.clone());
+  halo.rotation.x = Math.PI/2; halo.position.set(0, 0.42, 0.15);
+  const nose2 = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.18, 0.7, 8), matBase.clone());
+  nose2.rotation.x = Math.PI/2; nose2.position.set(0, -0.02, 1.05);
+  chassis.add(body, cockpit, halo, nose2);
+  chassis.position.set(0, 0.1, 0);
+  parts.push(chassis);
+
+  // 2: Rear wing
+  const rwGroup = new THREE.Group();
+  const rMain = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.04, 0.22), matRed.clone());
+  const rFlap = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.02, 0.16), matBase.clone());
+  rFlap.position.y = 0.06;
+  const rp1 = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.32, 0.22), matBase.clone());
+  rp1.position.x = -0.4;
+  const rp2 = rp1.clone(); rp2.position.x = 0.4;
+  const beam = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.04, 0.14), matBase.clone());
+  beam.position.y = -0.22;
+  rwGroup.add(rMain, rFlap, rp1, rp2, beam);
+  rwGroup.position.set(0, 0.45, -1.35);
+  parts.push(rwGroup);
+
+  // 3: Left sidepod
+  const spL = new THREE.Group();
+  const bodyL = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.28, 1.1), matBase.clone());
+  const inletL = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.22, 0.06), matCarbon.clone());
+  inletL.position.set(0, 0.02, 0.54);
+  spL.add(bodyL, inletL);
+  spL.position.set(-0.46, 0.06, -0.1);
+  parts.push(spL);
+
+  // 4: Floor / diffuser
+  const floorGrp = new THREE.Group();
+  const floorPanel = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.02, 2.6), matCarbon.clone());
+  const diffL = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.12, 0.5), matBase.clone());
+  diffL.position.set(-0.35, 0.06, -1.05); diffL.rotation.x = 0.2;
+  const diffR = diffL.clone(); diffR.position.x = 0.35;
+  floorGrp.add(floorPanel, diffL, diffR);
+  floorGrp.position.set(0, -0.2, 0);
+  parts.push(floorGrp);
+
+  // 5: Power unit (engine)
+  const puGrp = new THREE.Group();
+  const block = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.35, 0.7), matCarbon.clone());
+  const turbo = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.18, 12), matBase.clone());
+  turbo.rotation.z = Math.PI/2; turbo.position.set(0.24, 0.12, 0.08);
+  const exhaust = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.06, 0.35, 8), matBase.clone());
+  exhaust.rotation.x = Math.PI/2; exhaust.position.set(0, 0.14, -0.44);
+  puGrp.add(block, turbo, exhaust);
+  puGrp.position.set(0, 0.06, -0.38);
+  parts.push(puGrp);
+
+  // 6: Suspension + wheels (simplified)
+  const suspGrp = new THREE.Group();
+  const wheelGeo = new THREE.CylinderGeometry(0.24, 0.24, 0.22, 20);
+  const tyreGeo = new THREE.CylinderGeometry(0.28, 0.28, 0.3, 20);
+  const positions = [[-0.58,0,1.0],[0.58,0,1.0],[-0.58,0,-0.95],[0.58,0,-0.95]];
+  positions.forEach(p => {
+    const tyre = new THREE.Mesh(tyreGeo, matTyre.clone());
+    const rim = new THREE.Mesh(wheelGeo, matYellow.clone());
+    tyre.rotation.z = Math.PI/2; rim.rotation.z = Math.PI/2;
+    tyre.position.set(...p); rim.position.set(...p);
+    // Wishbone arms
+    const armGeo = new THREE.CylinderGeometry(0.012, 0.012, 0.38, 6);
+    const armMat = new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.9, roughness: 0.2 });
+    const arm1 = new THREE.Mesh(armGeo, armMat);
+    arm1.position.set(p[0]*0.5, p[1]+0.05, p[2]);
+    arm1.rotation.z = Math.PI/2;
+    suspGrp.add(tyre, rim, arm1);
+  });
+  suspGrp.position.y = -0.06;
+  parts.push(suspGrp);
+
+  // Add all parts and record positions
+  parts.forEach((part, i) => {
+    modelGroup.add(part);
+    part.userData.compIdx = i;
+    basePositions.push(part.position.clone());
+
+    // Traverse meshes for raycasting
+    part.traverse(obj => {
+      if (obj.isMesh) {
+        obj.userData.compIdx = i;
+        origMats.push(obj.material ? obj.material.clone() : null);
+        meshes.push(obj);
+      }
+    });
+  });
+
+  finishSetup();
+}
+
+function finishSetup() {
+  setProgress(100, 'READY');
+  setTimeout(() => {
+    document.getElementById('loading').style.display = 'none';
+    buildComponentList();
+    animate();
+    updateCamera();
+  }, 400);
+}
+
+// ── Component List ──
+function buildComponentList() {
+  const list = document.getElementById('comp-list');
+  list.innerHTML = '';
+  COMPONENTS.forEach((comp, i) => {
+    const el = document.createElement('div');
+    el.className = 'comp-item';
+    el.id = `comp-item-${i}`;
+    el.innerHTML = `
+      <div class="comp-number">0${i+1}</div>
+      <div class="comp-info">
+        <div class="comp-name">${comp.name}</div>
+        <div class="comp-desc">${comp.desc}</div>
+        <div class="comp-tag">${comp.tag}</div>
+      </div>
+    `;
+    el.onclick = () => selectComponent(i);
+    list.appendChild(el);
+  });
+}
+
+// ── Selection ──
+function selectComponent(idx) {
+  selectedIdx = idx;
+
+  // Update list
+  document.querySelectorAll('.comp-item').forEach(el => el.classList.remove('active'));
+  const item = document.getElementById(`comp-item-${idx}`);
+  if (item) { item.classList.add('active'); item.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+
+  // Update materials
+  highlightMesh(idx);
+
+  // Show spec card
+  showSpec(COMPONENTS[idx]);
+
+  // Auto-focus camera on part
+  focusOnPart(idx);
+}
+
+function highlightMesh(activeIdx) {
+  meshes.forEach((mesh, i) => {
+    if (!mesh || !mesh.material) return;
+    const compIdx = mesh.userData.compIdx;
+    if (compIdx === activeIdx) {
+      mesh.material.emissive = new THREE.Color(0xe8001d);
+      mesh.material.emissiveIntensity = 0.25;
+      mesh.material.opacity = 1;
+      mesh.material.transparent = false;
+    } else if (currentMode === 'xray') {
+      mesh.material.opacity = 0.08;
+      mesh.material.transparent = true;
+      mesh.material.emissive = new THREE.Color(0x000000);
+      mesh.material.emissiveIntensity = 0;
+    } else {
+      mesh.material.opacity = activeIdx === -1 ? 1 : 0.25;
+      mesh.material.transparent = activeIdx !== -1;
+      mesh.material.emissive = new THREE.Color(0x000000);
+      mesh.material.emissiveIntensity = 0;
+    }
+  });
+}
+
+function focusOnPart(idx) {
+  // Fly camera towards the part's position
+  const comp = COMPONENTS[idx];
+  const base = basePositions[idx] || new THREE.Vector3();
+  target.lerp(base, 0.5);
+  spherical.radius = Math.max(2.5, spherical.radius);
+  updateCamera();
+}
+
+// ── Spec Card ──
+function showSpec(comp) {
+  document.getElementById('spec-title').textContent = comp.short || comp.name;
+  document.getElementById('spec-sub').textContent = comp.desc;
+
+  const { specs } = comp;
+  let html = '';
+
+  // Overview
+  html += `<div class="spec-section">
+    <div class="spec-section-label">OVERVIEW</div>
+    <div class="spec-note">${specs.overview}</div>
+  </div>`;
+
+  // Technical specs
+  html += `<div class="spec-section">
+    <div class="spec-section-label">TECHNICAL SPECIFICATIONS</div>`;
+  specs.technical.forEach(r => {
+    html += `<div class="spec-row">
+      <div class="spec-key">${r.k}</div>
+      <div class="spec-val${r.highlight ? ' highlight' : ''}">${r.v}</div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // Performance bars
+  if (specs.bars) {
+    html += `<div class="spec-section">
+      <div class="spec-section-label">PERFORMANCE METRICS</div>`;
+    specs.bars.forEach(b => {
+      html += `<div class="spec-bar-row">
+        <div class="spec-bar-label"><span>${b.label}</span><span>${b.val}%</span></div>
+        <div class="spec-bar"><div class="spec-bar-fill" style="width:${b.val}%"></div></div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  // Tags
+  if (specs.tags) {
+    html += `<div class="spec-section">
+      <div class="spec-section-label">CLASSIFICATION</div>
+      <div class="spec-tag-row">`;
+    specs.tags.forEach(t => {
+      html += `<div class="spec-tag${t.startsWith('FIA') ? '' : ' red'}">${t}</div>`;
+    });
+    html += `</div></div>`;
+  }
+
+  // 2026 note
+  if (specs.note) {
+    html += `<div class="spec-section">
+      <div class="spec-section-label">2026 REGULATION NOTE</div>
+      <div class="spec-note">${specs.note}</div>
+    </div>`;
+  }
+
+  document.getElementById('spec-body').innerHTML = html;
+}
+
+// ── Mode Toggle ──
+function setMode(mode) {
+  currentMode = mode;
+  ['assembled','exploded','xray'].forEach(m => {
+    document.getElementById(`btn-${m}`).classList.toggle('active', m === mode);
+  });
+
+  if (mode === 'exploded') {
+    setExplodeFactor(65);
+    document.getElementById('explode-slider').value = 65;
+  } else if (mode === 'assembled') {
+    setExplodeFactor(0);
+    document.getElementById('explode-slider').value = 0;
+    resetHighlight();
+  } else if (mode === 'xray') {
+    setExplodeFactor(30);
+    document.getElementById('explode-slider').value = 30;
+    applyXray();
+  }
+}
+
+function resetHighlight() {
+  selectedIdx = -1;
+  meshes.forEach((mesh, i) => {
+    if (!mesh || !mesh.material) return;
+    mesh.material.opacity = 1;
+    mesh.material.transparent = false;
+    mesh.material.emissive = new THREE.Color(0x000000);
+    mesh.material.emissiveIntensity = 0;
+  });
+  document.querySelectorAll('.comp-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('spec-title').textContent = 'SELECT PART';
+  document.getElementById('spec-sub').textContent = 'Click any component on the model or from the list to view engineering specifications.';
+  document.getElementById('spec-body').innerHTML = `<div class="empty-state"><div class="empty-icon"></div><div class="empty-text">NO COMPONENT<br>SELECTED<br><br>CLICK A PART<br>TO BEGIN</div></div>`;
+}
+
+function applyXray() {
+  meshes.forEach(mesh => {
+    if (!mesh || !mesh.material) return;
+    mesh.material.opacity = 0.15;
+    mesh.material.transparent = true;
+  });
+}
+
+// ── Explode ──
+function setExplodeFactor(val) {
+  explodeFactor = val / 100;
+  document.getElementById('explode-val').textContent = Math.round(val) + '%';
+
+  if (!modelGroup) return;
+
+  // For procedural car: move top-level children
+  const children = modelGroup.children;
+  children.forEach((child, i) => {
+    const comp = COMPONENTS[i];
+    if (!comp) return;
+    const dir = new THREE.Vector3(...comp.explodeDir);
+    const base = new THREE.Vector3(0, 0, 0);
+    child.position.lerpVectors(base, new THREE.Vector3(
+      dir.x * 1.2, dir.y * 1.2, dir.z * 1.2
+    ), explodeFactor);
+  });
+
+  // For GLB car: move individual meshes based on their world position
+  if (meshes.length > 0 && children.length === 1) {
+    COMPONENTS.forEach((comp, i) => {
+      const dir = new THREE.Vector3(...comp.explodeDir);
+      meshes.forEach(mesh => {
+        if (mesh && mesh.userData.compIdx === i && basePositions[i]) {
+          const base = basePositions[i].clone();
+          mesh.position.lerpVectors(base, base.clone().add(dir.clone().multiplyScalar(0.5)), explodeFactor);
+        }
+      });
+    });
+  }
+}
+
+// ── Canvas Click → Raycast ──
+function onCanvasClick(e) {
+  const rect = e.target.getBoundingClientRect();
+  mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+  mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+  raycaster.setFromCamera(mouse, camera);
+  const hits = raycaster.intersectObjects(scene.children, true);
+  if (hits.length > 0) {
+    let obj = hits[0].object;
+    while (obj && obj.userData.compIdx === undefined) obj = obj.parent;
+    if (obj && obj.userData.compIdx >= 0 && obj.userData.compIdx < COMPONENTS.length) {
+      selectComponent(obj.userData.compIdx);
+    }
+  }
+}
+
+// ── Keyboard ──
+function onKeyDown(e) {
+  const k = e.key.toLowerCase();
+  if (k === 'e') { const v = explodeFactor > 0.5 ? 0 : 70; setExplodeFactor(v); document.getElementById('explode-slider').value = v; }
+  if (k === 'r') resetCamera();
+  if (k === 'x') setMode(currentMode === 'xray' ? 'assembled' : 'xray');
+  if (k === 'escape') resetHighlight();
+  const num = parseInt(k);
+  if (!isNaN(num) && num >= 1 && num <= 7) selectComponent(num - 1);
+}
+
+// ── Resize ──
+function resize() {
+  const wrap = document.getElementById('canvas').parentElement;
+  const w = wrap.clientWidth, h = wrap.clientHeight;
+  renderer.setSize(w, h);
+  if (camera) { camera.aspect = w / h; camera.updateProjectionMatrix(); }
+}
+
+// ── Animation ──
+let clock = new THREE.Clock();
+function animate() {
+  animationId = requestAnimationFrame(animate);
+  const t = clock.getElapsedTime();
+
+  // Subtle auto-rotate when nothing selected
+  if (selectedIdx === -1) {
+    spherical.theta += 0.0025;
+    updateCamera();
+  }
+
+  renderer.render(scene, camera);
+}
+
+// ── Boot ──
+window.addEventListener('load', initThree);
+</script>
+</body>
+</html>
